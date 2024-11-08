@@ -4,23 +4,6 @@ from server.models import Users, Department, Role, Category, Asset, RequestStatu
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
 
-@app.route('/')
-def home():
-    users = Users.query.all()
-
-    user_list = []
-    for user in users:
-        user_data = {
-            'id': user.id,
-            'name': user.name,
-            'email': user.email,
-            'role': user.role.name,
-            'department': user.department.name
-        }
-        user_list.append(user_data)
-
-    return jsonify({'users': user_list})
-
 @app.route('/register', methods=["POST", "GET"])
 def Register():
     if current_user.is_authenticated:
@@ -61,4 +44,26 @@ def login():
         return jsonify({"message": "Login successful", "user_id": user.id}), 200
     else:
         return jsonify({"message": "Invalid email or password"}), 401
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return jsonify({"message": "Logged out successfully"}), 200
+
+@app.route('/users', methods=["GET"])
+def home():
+    users = Users.query.all()
+
+    user_list = []
+    for user in users:
+        user_data = {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email,
+            'role': user.role.name,
+            'department': user.department.name
+        }
+        user_list.append(user_data)
+
+    return jsonify({'users': user_list})
 
