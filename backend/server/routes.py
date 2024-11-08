@@ -19,3 +19,46 @@ def home():
         }
         user_list.append(user_data)
 
+    return jsonify({'users': user_list})
+
+@app.route('/register', methods=["POST", "GET"])
+def Register():
+    if current_user.is_authenticated:
+        return jsonify({"message": "Already logged in"}), 200
+    
+    data = request.get_json()
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"message": "Email and password are required"}), 400
+    
+    user = Users.query.filter_by(email=email).first()
+    if user:
+        return jsonify({"message": "Email already registered, please choose a different one"}), 409
+ 
+    new_user = Users(username=username, email=email, password=bcrypt.generate_password_hash(password).decode('utf-8'))
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"message": "User created successfully"}), 201
+
+@app.route('/login', methods=["POST"])
+def login():
+    if current_user.is_authenticated:
+        return jsonify({"message": "Already logged in"}), 200
+
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"message": "Email and password are required"}), 400
+
+    user = Users.query.filter_by(email=email).first()
+    if user and bcrypt.check_password_hash(user.password, password):
+        login_user(user)
+        return jsonify({"message": "Login successful", "user_id": user.id}), 200
+    else:
+        return jsonify({"message": "Invalid email or password"}), 401
+
