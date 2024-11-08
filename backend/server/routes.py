@@ -67,3 +67,80 @@ def home():
 
     return jsonify({'users': user_list})
 
+@app.route('/assets')
+#@login_required
+def assets():
+    assets = Asset.query.all()
+    asset_list = []
+    for asset in assets:
+        asset = {
+            'asset_image': asset.image_url,
+            'asset_name': asset.asset_name,
+            'asset_status': asset.status,
+            'description': asset.description,
+            'category': asset.category.category_name,
+            'department': asset.department.department_name,
+            'allocated_to': asset.user_allocated_assets.username if asset.allocated_to else 'Not allocated',
+            'created_at': asset.created_at
+        }
+        asset_list.append(asset)
+    return jsonify({'assets': asset_list})
+
+@app.route('/asset/<int:id>')
+#@login_required
+def asset(id):
+    asset = Asset.query.get(id)
+    asset_data = {
+        'asset_image': asset.image_url,
+        'asset_name': asset.asset_name,
+        'asset_status': asset.status,
+        'description': asset.description,
+        'category': asset.category.category_name,
+        'department': asset.department.department_name,
+        'allocated_to': asset.user_allocated_assets.username if asset.allocated_to else 'Not allocated',
+        'created_at': asset.created_at
+    }
+    return jsonify({'asset': asset_data})
+
+
+@app.route('/add_asset', methods=['POST'])
+#@login_required
+def add_asset():
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    data = request.get_json()
+    new_asset = Asset(asset_name=data.get("asset_name"), description=data.get("description"),
+                    category_id=data.get('category_id'),image_url= data.get("image_url"), status=data.get("status"),
+                    department_id=data.get("department_id"),allocated_to=data.get("allocated_to"),
+                    created_at=datetime.utcnow())
+    db.session.add(new_asset)
+    db.session.commit()
+    return jsonify({'message': 'Asset added successfully'})
+
+@app.route('/asset/<int:id>/edit', methods=['POST'])
+#@login_required
+def edit_asset(id):
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    asset = Asset.query.get(id)
+    data = request.get_json()
+    asset.asset_name = data.get("asset_name", asset.asset_name)
+    asset.description = data.get("description", asset.description)
+    asset.category_id = data.get("category_id", asset.category_id)
+    asset.image_url = data.get("image_url", asset.image_url)
+    asset.status = data.get("status", asset.status)
+    asset.department_id = data.get("department_id", asset.department_id)
+    asset.allocated_to = data.get("allocated_to", asset.allocated_to)
+    db.session.commit()
+    return jsonify({'message': 'Asset updated successfully'})
+
+@app.route('/asset/<int:id>/delete', methods=['POST'])
+#@login_required
+def delete_asset(id):
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    asset = Asset.query.get(id)
+    db.session.delete(asset)
+    db.session.commit()
+    return jsonify({'message': 'Asset deleted successfully'})
+
