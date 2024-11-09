@@ -180,3 +180,33 @@ def request(id):
         'created_at': request.created_at
     }
     return jsonify({'request': request_data})
+
+@app.route('/add_request', methods=['POST'])
+#@login_required    
+def add_request():
+    data = request.get_json()
+    new_request = Request(request_type=data.get("request_type"), asset_id=data.get("asset_id"),
+                        requested_by=data.get("requested_by"), department_id=data.get("department_id"),
+                        quantity=data.get("quantity"), urgency=data.get("urgency"), reason=data.get("reason"),
+                        status_id=data.get("status_id"), created_at=datetime.utcnow())
+    db.session.add(new_request)
+    db.session.commit()
+    return jsonify({'message': 'Request added successfully'})
+
+@app.route('/request/<int:id>/edit', methods=['POST'])
+#@login_required
+def edit_request(id):
+    if current_user.role.role_name != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    request = Request.query.get(id)
+    data = request.get_json()
+    request.request_type = data.get("request_type", request.request_type)
+    request.asset_id = data.get("asset_id", request.asset_id)
+    request.requested_by = data.get("requested_by", request.requested_by)
+    request.department_id = data.get("department_id", request.department_id)
+    request.quantity = data.get("quantity", request.quantity)
+    request.urgency = data.get("urgency", request.urgency)
+    request.reason = data.get("reason", request.reason)
+    request.status_id = data.get("status_id", request.status_id)
+    db.session.commit()
+    return jsonify({'message': 'Request updated successfully'})
