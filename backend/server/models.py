@@ -16,7 +16,7 @@ class Users(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     requests = db.relationship('Request', backref='user_requests', lazy=True)
-    request_reviews = db.relationship('RequestReview', backref='written_reviews', lazy=True)  # Renamed backref
+    request_reviews = db.relationship('RequestReview', backref='written_reviews', lazy=True) 
     allocated_assets = db.relationship('Asset', backref='allocated_user', lazy=True)
 
     def __repr__(self):
@@ -63,12 +63,13 @@ class Asset(db.Model):
     description = db.Column(db.String(40))
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     image_url = db.Column(db.String(255))
-    status = db.Column(db.String(20))  
+    status = db.Column(db.String(20)) 
     allocated_to = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     requests = db.relationship('Request', backref='asset', lazy=True)
+    user_allocated_assets = db.relationship('Users', backref='allocated_asset', lazy=True)
 
     def __repr__(self):
         return f"Asset('{self.asset_name}', '{self.status}')"
@@ -85,7 +86,7 @@ class RequestStatus(db.Model):
 
 class Request(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    request_type = db.Column(db.String(100)) 
+    request_type = db.Column(db.String(100))
     asset_id = db.Column(db.Integer, db.ForeignKey('asset.id'), nullable=True)
     requested_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=False)
@@ -96,8 +97,9 @@ class Request(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     reviews = db.relationship('RequestReview', back_populates='request', lazy=True)
-
-    user_requested = db.relationship('Users', backref='requestss', lazy=True)
+    user_requesting = db.relationship('Users', backref='user_requesting', lazy=True)
+    department_requesting = db.relationship('Department', backref='department_requesting', lazy=True)
+    request_status = db.relationship('RequestStatus', backref='request_status', lazy=True)
 
     def __repr__(self):
         return f"Request('{self.request_type}', '{self.status_id}')"
@@ -112,7 +114,7 @@ class RequestReview(db.Model):
     reviewed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     request = db.relationship('Request', back_populates='reviews')
-    reviewed_by_user = db.relationship('Users', backref='requesting_reviews', lazy=True)  # Renamed to prevent conflict
+    reviewed_by_user = db.relationship('Users', backref='requesting_reviews', lazy=True) 
 
     def __repr__(self):
         return f"RequestReview('{self.status}', '{self.reviewed_by}')"
