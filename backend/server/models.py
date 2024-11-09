@@ -16,7 +16,7 @@ class Users(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     requests = db.relationship('Request', backref='user_requests', lazy=True)
-    request_reviews = db.relationship('RequestReview', backref='written_reviews', lazy=True) 
+    request_reviews = db.relationship('ReviewRequests', backref='written_reviews', lazy=True) 
     allocated_assets = db.relationship('Asset', backref='allocated_user', lazy=True)
 
     def __repr__(self):
@@ -93,10 +93,10 @@ class Request(db.Model):
     quantity = db.Column(db.Integer)
     urgency = db.Column(db.String(20))
     reason = db.Column(db.Text)
-    status_id = db.Column(db.Integer, db.ForeignKey('request_status.id'), nullable=False)
+    status_id = db.Column(db.Integer, db.ForeignKey('request_status.id'), nullable=False, default=1)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    reviews = db.relationship('RequestReview', back_populates='request', lazy=True)
+    reviews = db.relationship('ReviewRequests', back_populates='request', lazy=True)
     user_requesting = db.relationship('Users', backref='user_requesting', lazy=True)
     department_requesting = db.relationship('Department', backref='department_requesting', lazy=True)
     request_status = db.relationship('RequestStatus', backref='request_status', lazy=True)
@@ -105,23 +105,20 @@ class Request(db.Model):
     def __repr__(self):
         return f"Request('{self.request_type}', '{self.status_id}')"
 
-
-class RequestReview(db.Model):
+class ReviewRequests(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=False)
     reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    status = db.Column(db.String(20)) 
+    status_id = db.Column(db.Integer, db.ForeignKey('request_status.id'), nullable=False, default=1)
     review_comment = db.Column(db.Text)
     reviewed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     request = db.relationship('Request', back_populates='reviews')
-    reviewed_by_user = db.relationship('Users', backref='requesting_reviews', lazy=True) 
+    reviewed_by_user = db.relationship('Users', backref='requesting_reviews', lazy=True)
+    status = db.relationship('RequestStatus', backref='review_requests', lazy=True)
 
     def __repr__(self):
-        return f"RequestReview('{self.status}', '{self.reviewed_by}')"
-
-    def __repr__(self):
-        return f"RequestReview('{self.status}', '{self.reviewed_by}')"
+        return f"ReviewRequests('{self.status}', '{self.reviewed_by}')"
     
         admin_role = Role(
             role_name="Admin",

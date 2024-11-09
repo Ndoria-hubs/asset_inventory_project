@@ -167,7 +167,7 @@ def requests():
 @app.route('/request/<int:id>')
 #@login_required
 def request(id):
-    request = Request.query.get(id)
+    request = Request.query.get_or_404(id)
     request_data = {
         'request_type': request.request_type,
         'asset_name': request.related_asset.asset_name,
@@ -182,37 +182,28 @@ def request(id):
     }
     return jsonify({'request': request_data})
 
-@app.route('/add_request', methods=['POST'])
+@app.route('/new_request', methods=['POST'])
 #@login_required    
 def add_request():
     data = request.get_json()
     new_request = Request(request_type=data.get("request_type"), asset_id=data.get("asset_id"),
-                        requested_by=data.get("requested_by"), department_id=data.get("department_id"),
+                        requested_by=current_user.id, department_id=data.get("department_id"),
                         quantity=data.get("quantity"), urgency=data.get("urgency"), reason=data.get("reason"),
                         status_id=data.get("status_id"), created_at=datetime.utcnow())
     db.session.add(new_request)
     db.session.commit()
     return jsonify({'message': 'Request added successfully'})
 
-@app.route('/request/approve/<int:id>', methods=['POST'])
+@app.route('/request/<int:id>/review', methods=['POST'])
 #@login_required
-def approve_request(id):
-    if current_user.role.role_name != 'Admin':
-        return jsonify({'message': 'Unauthorized to access this page'}), 403
-    request = Request.query.get(id)
-    request.status_id = 2
+def review_request(id):
+    data = request.get_json()
+    request = Request.query.get_or_404(id)
+    new_review = RequestReview(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
+                            review_comment=data.get("review_comment"), reviewed_at=datetime.utcnow())
+    db.session.add(new_review)
     db.session.commit()
-    return jsonify({'message': 'Request approved successfully'})
-
-@app.route('/request/reject/<int:id>', methods=['POST'])
-#@login_required
-def reject_request(id):
-    if current_user.role.role_name != 'Admin':
-        return jsonify({'message': 'Unauthorized to access this page'}), 403
-    request = Request.query.get(id)
-    request.status_id = 3
-    db.session.commit()
-    return jsonify({'message': 'Request rejected, better luck next time'})
+    return jsonify({'message': 'Request reviewed successfully'})
 
 @app.route('/requests/pending', methods=['GET'])
 #@login_required
