@@ -195,3 +195,23 @@ def add_request():
     db.session.add(new_request)
     db.session.commit()
     return jsonify({'message': 'Request added successfully'})
+
+@app.route('/request/approve/<int:id>', methods=['POST'])
+#@login_required
+def approve_request(id):
+    if current_user.role.role_name != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    request = Request.query.get(id)
+    request.status_id = 2
+    db.session.commit()
+    return jsonify({'message': 'Request approved successfully'})
+
+@app.route('/request/reject/<int:id>', methods=['POST'])
+#@login_required
+def reject_request(id):
+    if current_user.role.role_name != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    request = Request.query.get(id)
+    request.status_id = 3
+    db.session.commit()
+    return jsonify({'message': 'Request rejected, better luck next time'})
