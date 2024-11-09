@@ -6,9 +6,8 @@ from datetime import datetime
 
 @app.route('/register', methods=["POST", "GET"])
 def Register():
-    if current_user.is_authenticated:
-        return jsonify({"message": "Already logged in"}), 200
-    
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
     data = request.get_json()
     username = data.get("username")
     email = data.get("email")
@@ -147,6 +146,8 @@ def delete_asset(id):
 @app.route('/requests')
 #@login_required
 def requests():
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
     requests = Request.query.all()
     request_data = []
     for request in requests:
@@ -167,6 +168,8 @@ def requests():
 @app.route('/request/<int:id>')
 #@login_required
 def request(id):
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
     request = Request.query.get(id)
     request_data = {
         'request_type': request.request_type,
@@ -192,21 +195,3 @@ def add_request():
     db.session.add(new_request)
     db.session.commit()
     return jsonify({'message': 'Request added successfully'})
-
-@app.route('/request/<int:id>/edit', methods=['POST'])
-#@login_required
-def edit_request(id):
-    if current_user.role.role_name != 'Admin':
-        return jsonify({'message': 'Unauthorized to access this page'}), 403
-    request = Request.query.get(id)
-    data = request.get_json()
-    request.request_type = data.get("request_type", request.request_type)
-    request.asset_id = data.get("asset_id", request.asset_id)
-    request.requested_by = data.get("requested_by", request.requested_by)
-    request.department_id = data.get("department_id", request.department_id)
-    request.quantity = data.get("quantity", request.quantity)
-    request.urgency = data.get("urgency", request.urgency)
-    request.reason = data.get("reason", request.reason)
-    request.status_id = data.get("status_id", request.status_id)
-    db.session.commit()
-    return jsonify({'message': 'Request updated successfully'})
