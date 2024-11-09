@@ -144,3 +144,39 @@ def delete_asset(id):
     db.session.commit()
     return jsonify({'message': 'Asset deleted successfully'})
 
+@app.route('/requests')
+#@login_required
+def requests():
+    requests = Request.query.all()
+    request_data = []
+    for request in requests:
+        request = {
+            'request_type': request.request_type,
+            'asset_id': request.asset_id,
+            'requested_by': request.user_requesting.username,
+            'department': request.department_requesting.department_name,
+            'quantity': request.quantity,
+            'urgency': request.urgency,
+            'reason': request.reason,
+            'status': request.request_status.status_name,
+            'created_at': request.created_at
+        }
+        request_data.append(request)
+    return jsonify({'requests': request_data})
+
+@app.route('/request/<int:id>')
+#@login_required
+def request(id):
+    request = Request.query.get(id)
+    request_data = {
+        'request_type': request.request_type,
+        'asset_id': request.asset_id,
+        'requested_by': request.user_requesting.username,
+        'department': request.department_requesting.department_name,
+        'quantity': request.quantity,
+        'urgency': request.urgency,
+        'reason': request.reason,
+        'status': request.request_status.status_name,
+        'created_at': request.created_at
+    }
+    return jsonify({'request': request_data})
