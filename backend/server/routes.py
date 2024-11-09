@@ -213,3 +213,24 @@ def reject_request(id):
     request.status_id = 3
     db.session.commit()
     return jsonify({'message': 'Request rejected, better luck next time'})
+
+@app.route('/requests/pending', methods=['GET'])
+#@login_required
+def pending_requests():
+    requests = Request.query.filter_by(status_id=1).all()
+    request_data = []
+    for request in requests:
+        request = {
+            'request_type': request.request_type,
+            'asset_name': request.related_asset.asset_name,
+            'asset_image': request.related_asset.image_url,
+            'requested_by': request.user_requesting.username,
+            'department': request.department_requesting.department_name,
+            'quantity': request.quantity,
+            'urgency': request.urgency,
+            'reason': request.reason,
+            'status': request.request_status.status_name,
+            'created_at': request.created_at
+        }
+        request_data.append(request)
+    return jsonify({'requests': request_data})
