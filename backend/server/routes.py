@@ -197,13 +197,23 @@ def add_request():
 @app.route('/request/<int:id>/review', methods=['POST'])
 #@login_required
 def review_request(id):
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
     data = request.get_json()
     request = Request.query.get_or_404(id)
-    new_review = RequestReview(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
-                            review_comment=data.get("review_comment"), reviewed_at=datetime.utcnow())
-    db.session.add(new_review)
-    db.session.commit()
-    return jsonify({'message': 'Request reviewed successfully'})
+    if data.get("status") == 2:
+        new_review = RequestReview(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
+                                review_comment=data.get("review_comment"), reviewed_at=datetime.utcnow())
+        db.session.add(new_review)
+        db.session.commit()
+        return jsonify({'message': 'Request approved successfully'})
+    else:
+        new_review = RequestReview(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
+                                review_comment=data.get("review_comment"), reviewed_at=datetime.utcnow())
+        db.session.add(new_review)
+        db.session.commit()
+        return jsonify({'message': 'Request rejected, reason: {}'.format(data.get("review_comment"))})
+    
 
 @app.route('/requests/pending', methods=['GET'])
 #@login_required
