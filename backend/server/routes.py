@@ -1,6 +1,6 @@
 from server import app, db, bcrypt,cors
 from flask import render_template,redirect, url_for,flash, request, jsonify
-from server.models import Users, Department, Role, Category, Asset, RequestStatus, Request, RequestReview
+from server.models import Users, Department, Category, Asset, RequestStatus, Request, ReviewRequests
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
 
@@ -202,13 +202,13 @@ def review_request(id):
     data = request.get_json()
     request = Request.query.get_or_404(id)
     if data.get("status") == 2:
-        new_review = RequestReview(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
+        new_review = ReviewRequests(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
                                 review_comment=data.get("review_comment"), reviewed_at=datetime.utcnow())
         db.session.add(new_review)
         db.session.commit()
         return jsonify({'message': 'Request approved successfully'})
     else:
-        new_review = RequestReview(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
+        new_review = ReviewRequests(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
                                 review_comment=data.get("review_comment"), reviewed_at=datetime.utcnow())
         db.session.add(new_review)
         db.session.commit()

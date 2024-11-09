@@ -13,6 +13,7 @@ class Users(db.Model, UserMixin):
     password = db.Column(db.String(255), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False, default=3)
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=False)
+    role = db.Column(db.String(30), nullable=False, default='User')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     requests = db.relationship('Request', backref='user_requests', lazy=True)
@@ -23,18 +24,18 @@ class Users(db.Model, UserMixin):
         return f"User('{self.username}', '{self.email}')"
 
 
-class Role(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    role_name = db.Column(db.String(100), unique=True, nullable=False)
-    can_view_requests = db.Column(db.Boolean, default=False)
-    can_approve_requests = db.Column(db.Boolean, default=False)
-    can_manage_assets = db.Column(db.Boolean, default=False)
-    can_view_all_requests = db.Column(db.Boolean, default=False)
+#class Role(db.Model):
+    #id = db.Column(db.Integer, primary_key=True)
+    #role_name = db.Column(db.String(100), unique=True, nullable=False)
+    #can_view_requests = db.Column(db.Boolean, default=False)
+    #can_approve_requests = db.Column(db.Boolean, default=False)
+    #can_manage_assets = db.Column(db.Boolean, default=False)
+    #can_view_all_requests = db.Column(db.Boolean, default=False)
 
-    users = db.relationship('Users', backref='role', lazy=True)
+    #users = db.relationship('Users', backref='role', lazy=True)
 
-    def __repr__(self):
-        return f"Role('{self.role_name}')"
+    #def __repr__(self):
+        #return f"Role('{self.role_name}')"
 
 class Department(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
