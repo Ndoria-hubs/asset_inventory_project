@@ -146,14 +146,13 @@ def delete_asset(id):
 @app.route('/requests')
 #@login_required
 def requests():
-    if current_user.role != 'Admin':
-        return jsonify({'message': 'Unauthorized to access this page'}), 403
     requests = Request.query.all()
     request_data = []
     for request in requests:
         request = {
             'request_type': request.request_type,
-            'asset_id': request.asset_id,
+            'asset_name': request.related_asset.asset_name,
+            'asset_image': request.related_asset.image_url,
             'requested_by': request.user_requesting.username,
             'department': request.department_requesting.department_name,
             'quantity': request.quantity,
@@ -168,12 +167,11 @@ def requests():
 @app.route('/request/<int:id>')
 #@login_required
 def request(id):
-    if current_user.role != 'Admin':
-        return jsonify({'message': 'Unauthorized to access this page'}), 403
     request = Request.query.get(id)
     request_data = {
         'request_type': request.request_type,
-        'asset_id': request.asset_id,
+        'asset_name': request.related_asset.asset_name,
+        'asset_image': request.related_asset.image_url,
         'requested_by': request.user_requesting.username,
         'department': request.department_requesting.department_name,
         'quantity': request.quantity,

@@ -100,6 +100,7 @@ class Request(db.Model):
     user_requesting = db.relationship('Users', backref='user_requesting', lazy=True)
     department_requesting = db.relationship('Department', backref='department_requesting', lazy=True)
     request_status = db.relationship('RequestStatus', backref='request_status', lazy=True)
+    related_asset = db.relationship('Asset', backref='related_request', lazy=True)
 
     def __repr__(self):
         return f"Request('{self.request_type}', '{self.status_id}')"
