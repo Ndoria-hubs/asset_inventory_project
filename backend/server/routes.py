@@ -52,18 +52,16 @@ def logout():
 @app.route('/users', methods=["GET"])
 def home():
     users = Users.query.all()
-
     user_list = []
     for user in users:
-        user_data = {
-            'id': user.id,
-            'name': user.name,
+        user = {
+            'username': user.username,
             'email': user.email,
-            'role': user.role.name,
-            'department': user.department.name
+            'department': user.department.department_name,
+            'role': user.role,
+            'created_at': user.created_at
         }
-        user_list.append(user_data)
-
+        user_list.append(user)
     return jsonify({'users': user_list})
 
 @app.route('/assets')

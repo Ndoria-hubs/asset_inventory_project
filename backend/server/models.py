@@ -11,7 +11,6 @@ class Users(db.Model, UserMixin):
     username = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False, default=3)
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=False)
     role = db.Column(db.String(30), nullable=False, default='User')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

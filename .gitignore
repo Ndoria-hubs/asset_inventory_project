@@ -1,3 +1,5 @@
 static
 templates
 forms.py
+instance
+seed.py

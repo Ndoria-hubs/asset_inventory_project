@@ -1,60 +1,69 @@
-from app import app
-from models import db, Users, Department, Role, Category, Asset, RequestStatus, Request, RequestReview, ActivityLog
 from datetime import datetime
+from server import app, db
+from server.models import Users, Department, Category, Asset, RequestStatus, Request, ReviewRequests
+from werkzeug.security import generate_password_hash
 
 with app.app_context():
     # Delete existing data
     print("Deleting data...")
-    ActivityLog.query.delete()
-    RequestReview.query.delete()
+    ReviewRequests.query.delete()
     Request.query.delete()
     RequestStatus.query.delete()
     Asset.query.delete()
     Category.query.delete()
     Department.query.delete()
     Users.query.delete()
-    Role.query.delete()
-
-    # Create Roles
-    print("Creating roles...")
-    admin_role = Role(role_name="Admin", can_view_requests=True, can_approve_requests=True, can_manage_assets=True, can_view_all_requests=True)
-    procurement_manager_role = Role(role_name="Procurement Manager", can_view_requests=True, can_approve_requests=True, can_manage_assets=False, can_view_all_requests=False)
-    normal_member_role = Role(role_name="Normal Member", can_view_requests=True, can_approve_requests=False, can_manage_assets=False, can_view_all_requests=False)
-    roles = [admin_role, procurement_manager_role, normal_member_role]
-    db.session.add_all(roles)
 
     # Create Departments
     print("Creating departments...")
     hr_department = Department(department_name="Human Resources")
     it_department = Department(department_name="IT Department")
     finance_department = Department(department_name="Finance Department")
-    departments = [hr_department, it_department, finance_department]
+    marketing_department = Department(department_name="Marketing Department")
+    operations_department = Department(department_name="Operations Department")
+    legal_department = Department(department_name="Legal Department")
+    
+    departments = [hr_department, it_department, finance_department, marketing_department, operations_department, legal_department]
     db.session.add_all(departments)
+    db.session.commit()
 
     # Create Categories
     print("Creating categories...")
     electronics_category = Category(category_name="Electronics", description="Electronic assets like laptops and phones.")
     furniture_category = Category(category_name="Furniture", description="Furniture assets like desks and chairs.")
     vehicles_category = Category(category_name="Vehicles", description="Company vehicles.")
-    categories = [electronics_category, furniture_category, vehicles_category]
+    tools_category = Category(category_name="Tools", description="Operational tools for various departments.")
+    
+    categories = [electronics_category, furniture_category, vehicles_category, tools_category]
     db.session.add_all(categories)
+    db.session.commit()
 
     # Create Users
     print("Creating users...")
-    user1 = Users(username="john_doe", email="john@example.com", password="password", role=admin_role, department=it_department)
-    user2 = Users(username="jane_smith", email="jane@example.com", password="password", role=procurement_manager_role, department=finance_department)
-    user3 = Users(username="alice_jones", email="alice@example.com", password="password", role=normal_member_role, department=hr_department)
-    users = [user1, user2, user3]
+    users = []
+    for i in range(1, 11):
+        username = f"user{i}"
+        email = f"user{i}@example.com"
+        password = generate_password_hash("password")
+        department = departments[i % len(departments)]
+        users.append(Users(username=username, email=email, password=password, department=department, role="User"))
+    
     db.session.add_all(users)
-    db.session.commit()  # Commit to ensure users have IDs before proceeding
+    db.session.commit()
 
     # Create Assets
     print("Creating assets...")
-    asset1 = Asset(asset_name="Laptop", description="MacBook Pro", category=electronics_category, department=it_department, allocated_to=user1.id)
-    asset2 = Asset(asset_name="Office Chair", description="Ergonomic chair", category=furniture_category, department=hr_department, allocated_to=user3.id)
-    asset3 = Asset(asset_name="Company Car", description="Toyota Corolla", category=vehicles_category, department=finance_department)
-    assets = [asset1, asset2, asset3]
+    assets = []
+    for i in range(1, 11):
+        asset_name = f"Asset {i}"
+        description = f"Description of Asset {i}"
+        category = categories[i % len(categories)]
+        department = departments[i % len(departments)]
+        allocated_to = i if i % 2 == 0 else None  # Allocate some assets to users
+        assets.append(Asset(asset_name=asset_name, description=description, category=category, department=department, allocated_to=allocated_to))
+
     db.session.add_all(assets)
+    db.session.commit()
 
     # Create Request Statuses
     print("Creating request statuses...")
@@ -63,29 +72,36 @@ with app.app_context():
     status_rejected = RequestStatus(status_name="Rejected", description="Request has been rejected.")
     statuses = [status_pending, status_approved, status_rejected]
     db.session.add_all(statuses)
+    db.session.commit()
 
     # Create Requests
     print("Creating requests...")
-    request1 = Request(request_type="New Laptop", asset=asset1, requested_by=user1.id, department=it_department.id, quantity=1, urgency="High", reason="Replacement needed", status=status_pending)
-    request2 = Request(request_type="Office Chair", asset=asset2, requested_by=user3.id, department=hr_department.id, quantity=1, urgency="Low", reason="Additional chair", status=status_approved)
-    requests = [request1, request2]
+    requests = []
+    for i in range(1, 11):
+        request_type = f"Request {i}"
+        asset = assets[i % len(assets)]
+        requested_by = users[i % len(users)]
+        department = departments[i % len(departments)]
+        quantity = i
+        urgency = "High" if i % 2 == 0 else "Low"
+        reason = f"Reason for request {i}"
+        status = statuses[i % len(statuses)]
+        requests.append(Request(request_type=request_type, asset=asset, requested_by=requested_by, department=department, quantity=quantity, urgency=urgency, reason=reason, status=status))
+
     db.session.add_all(requests)
-    db.session.commit()  # Commit to ensure requests have IDs before proceeding
+    db.session.commit()
 
     # Create Request Reviews
     print("Creating request reviews...")
-    review1 = RequestReview(request=request1, reviewed_by=user2.id, status="Approved", review_comment="Approved for urgent need")
-    review2 = RequestReview(request=request2, reviewed_by=user1.id, status="Rejected", review_comment="Insufficient budget")
-    reviews = [review1, review2]
+    reviews = []
+    for i in range(1, 6):
+        request = requests[i - 1]  # Use the first 5 requests for reviews
+        reviewed_by = users[(i + 1) % len(users)]  # Get a different user for each review
+        status = statuses[(i + 1) % len(statuses)]  # Alternate between statuses
+        review_comment = f"Review comment for request {i}"
+        reviews.append(ReviewRequests(request=request, reviewed_by=reviewed_by, status=status, review_comment=review_comment))
+
     db.session.add_all(reviews)
-
-    # Create Activity Logs
-    print("Creating activity logs...")
-    log1 = ActivityLog(user_id=user1.id, action="Created a request for a new laptop", request_id=request1.id, timestamp=datetime.now())
-    log2 = ActivityLog(user_id=user2.id, action="Reviewed a request for a new chair", request_id=request2.id, timestamp=datetime.now())
-    activity_logs = [log1, log2]
-    db.session.add_all(activity_logs)
-
-    # Commit all changes
     db.session.commit()
+
     print("Seeding done!")
