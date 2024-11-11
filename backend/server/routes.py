@@ -288,3 +288,28 @@ def departments():
             'members': [user.username for user in department.users]
         }
     return jsonify({'departments': department_data})
+
+@app.route('/department/<int:id>')
+#@login_required
+def department(id):
+    department = Department.query.get_or_404(id)
+    department_data = {
+        "department_name":department.department_name,
+        'assets': [asset.asset_name for asset in department.assets],
+        'requests': [
+            {
+                "request_type": request.request_type,
+                "asset_name": request.related_asset.asset_name,
+                "asset_image": request.related_asset.image_url,
+                "requested_by":request.user_requesting.username,
+                "quantity": request.quantity,
+                "urgency": request.urgency,
+                "reason": request.reason,
+                "status": request.request_status.status_name,
+                "created_at": request.created_at
+            }
+            for request in department.requests
+        ],
+        'members': [user.username for user in department.users]
+    }
+    return jsonify({'department': department_data})
