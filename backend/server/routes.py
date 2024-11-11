@@ -1,5 +1,5 @@
 from server import app, db, bcrypt
-from flask import render_template,redirect, url_for,flash, request, jsonify
+from flask import request, jsonify
 from server.models import Users, Department, Category, Asset, RequestStatus, Request, ReviewRequests
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
@@ -313,3 +313,55 @@ def department(id):
         'members': [user.username for user in department.users]
     }
     return jsonify({'department': department_data})
+
+@app.route('/categories', methods=['GET'])
+#@login_required
+def categories():
+    categories = Category.query.all()
+    category_data = {}
+    for category in categories:
+        category_data[category.category_name] = {
+            'assets': [asset.asset_name for asset in category.assets]
+        }
+    return jsonify({'categories': category_data})
+
+@app.route('/my_profile', methods=['GET'])
+#@login_required
+def my_profile():
+    user_data = {
+        'username': current_user.username,
+        'email': current_user.email,
+        'department': current_user.department.department_name,
+        'my allocated assets': [asset.asset_name for asset in user.allocated_assets],
+        'role': current_user.role,
+        'created_at': current_user.created_at
+    }
+    return jsonify({'user': user_data})
+
+@app.route('/user/<int:id>', methods=['GET', 'POST'])
+#@login_required
+def user(id):
+    user = Users.query.get_or_404(id)
+    user_data = {
+        'username': user.username,
+        'email': user.email,
+        'department': user.department.department_name,
+        'allocated assets': [asset.asset_name for asset in user.allocated_assets],
+        'role': user.role,
+        'created_at': user.created_at
+        }
+    return jsonify({'user': user_data})
+ 
+@app.route('/user/<int:id>/edit', methods=['POST'])
+#@login_required
+def edit_user(id):
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    user = Users.query.get(id)
+    data = request.get_json()
+    user.username = user.username
+    user.email = user.email
+    user.role = data.get("role", user.role)
+    user.department_id = data.get("department_id", user.department_id)
+    db.session.commit()
+    return jsonify({'message': 'User updated successfully'})
