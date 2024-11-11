@@ -11,6 +11,14 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'jfdcbgfcxdgfddfgbgffhdhsjdf'
+CORS(app)
+CORS(app, resources={
+    r"/*": { 
+        "origins": "http://localhost:3000",
+        "methods": ["GET", "POST"],
+        "supports_credentials": True 
+    }
+})
 DATABASE_URL = os.getenv("supabase_url")
 
 if DATABASE_URL:
@@ -33,9 +41,9 @@ else:
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
-cors = CORS(app)
 login_manager = LoginManager(app)
-login_manager.login_view = ('login')
+
+#login_manager.login_view = ('login')
 #login_manager.login_message_category = 'info'
 from server import models
 with app.app_context():

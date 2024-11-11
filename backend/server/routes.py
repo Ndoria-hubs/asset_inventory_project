@@ -1,10 +1,39 @@
-from server import app, db, bcrypt,cors
+from server import app, db, bcrypt
 from flask import render_template,redirect, url_for,flash, request, jsonify
 from server.models import Users, Department, Category, Asset, RequestStatus, Request, ReviewRequests
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
 
+#creating the first admin user
+@app.route('/setup', methods=['POST'])
+def setup():
+    user = Users.query.filter_by(role='admin').first()
+    if user:
+        return jsonify(message="Admin user already exists."), 400
+    elif user.query.filter_by(email=email).first():
+        return jsonify(message="Email already exists.please choose a different one"), 400
+    else:
+        data = request.get_json()
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+        department = data.get('department')
+        role = 'Admin'
+    
+        new_user = Users(
+            username=username,
+            email=email,
+            password=bcrypt.generate_password_hash(password).decode('utf-8'),
+            department=department,
+            role=role
+            )
+        db.session.add(new_user)
+        db.session.commit()
+
+    return jsonify(message="Admin user created successfully."), 201
+
 @app.route('/register', methods=["POST", "GET"])
+#@login_required
 def Register():
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
@@ -233,3 +262,29 @@ def pending_requests():
         }
         request_data.append(request)
     return jsonify({'requests': request_data})
+
+@app.route('/departments', methods=['GET'])
+#@login_required
+def departments():
+    departments = Department.query.all()
+    department_data = {}
+    for department in departments:
+        department_data[department.department_name] = {
+            'assets': [asset.asset_name for asset in department.assets],
+             'requests': [
+                {
+                   "request_type": request.request_type,
+                    "asset_name": request.related_asset.asset_name,
+                    "asset_image": request.related_asset.image_url,
+                    "requested_by":request.user_requesting.username,
+                    "quantity": request.quantity,
+                    "urgency": request.urgency,
+                    "reason": request.reason,
+                    "status": request.request_status.status_name,
+                    "created_at": request.created_at
+                }
+                for request in department.requests
+            ],
+            'members': [user.username for user in department.users]
+        }
+    return jsonify({'departments': department_data})
