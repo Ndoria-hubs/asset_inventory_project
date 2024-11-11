@@ -22,20 +22,6 @@ class Users(db.Model, UserMixin):
     def __repr__(self):
         return f"User('{self.username}', '{self.email}')"
 
-
-#class Role(db.Model):
-    #id = db.Column(db.Integer, primary_key=True)
-    #role_name = db.Column(db.String(100), unique=True, nullable=False)
-    #can_view_requests = db.Column(db.Boolean, default=False)
-    #can_approve_requests = db.Column(db.Boolean, default=False)
-    #can_manage_assets = db.Column(db.Boolean, default=False)
-    #can_view_all_requests = db.Column(db.Boolean, default=False)
-
-    #users = db.relationship('Users', backref='role', lazy=True)
-
-    #def __repr__(self):
-        #return f"Role('{self.role_name}')"
-
 class Department(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     department_name = db.Column(db.String(100), unique=True, nullable=False)
@@ -120,24 +106,37 @@ class ReviewRequests(db.Model):
     def __repr__(self):
         return f"ReviewRequests('{self.status}', '{self.reviewed_by}')"
     
-        admin_role = Role(
-            role_name="Admin",
-            can_view_requests=True,
-            can_approve_requests=True,
-            can_manage_assets=True,
-            can_view_all_requests=True
-        )
-        procurement_manager_role = Role(
-            role_name="Procurement Manager",
-            can_view_requests=True,
-            can_approve_requests=True,
-            can_manage_assets=False,
-            can_view_all_requests=False
-        )
-        admin_role = Role(
-            role_name="Admin",
-            can_view_requests=True,
-            can_approve_requests=True,
-            can_manage_assets=True,
-            can_view_all_requests=True
-        )
+#class Role(db.Model):
+    #id = db.Column(db.Integer, primary_key=True)
+    #role_name = db.Column(db.String(100), unique=True, nullable=False)
+    #can_view_requests = db.Column(db.Boolean, default=False)
+    #can_approve_requests = db.Column(db.Boolean, default=False)
+    #can_manage_assets = db.Column(db.Boolean, default=False)
+    #can_view_all_requests = db.Column(db.Boolean, default=False)
+
+    #users = db.relationship('Users', backref='role', lazy=True)
+
+    #def __repr__(self):
+        #return f"Role('{self.role_name}')"
+    
+       # admin_role = Role(
+        #    role_name="Admin",
+         #   can_view_requests=True,
+          #  can_approve_requests=True,
+           # can_manage_assets=True,
+            #can_view_all_requests=True
+        #)
+        #procurement_manager_role = Role(
+         #   role_name="Procurement Manager",
+          #  can_view_requests=True,
+           # can_approve_requests=True,
+            #can_manage_assets=False,
+            #can_view_all_requests=False
+        #)
+        #admin_role = Role(
+         #   role_name="Admin",
+          #  can_view_requests=True,
+           # can_approve_requests=True,
+            #can_manage_assets=True,
+            #can_view_all_requests=True
+        #)
