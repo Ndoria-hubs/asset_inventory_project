@@ -74,24 +74,10 @@ def login():
         return jsonify({"message": "Invalid email or password"}), 401
 
 @app.route('/logout')
+#@login_required
 def logout():
     logout_user()
     return jsonify({"message": "Logged out successfully"}), 200
-
-@app.route('/users', methods=["GET"])
-def home():
-    users = Users.query.all()
-    user_list = []
-    for user in users:
-        user = {
-            'username': user.username,
-            'email': user.email,
-            'department': user.department.department_name,
-            'role': user.role,
-            'created_at': user.created_at
-        }
-        user_list.append(user)
-    return jsonify({'users': user_list})
 
 @app.route('/assets')
 #@login_required
@@ -107,7 +93,7 @@ def assets():
             'category': asset.category.category_name,
             'department': asset.department.department_name,
             'allocated_to': asset.user_allocated_assets.username if asset.allocated_to else 'Not allocated',
-            'created_at': asset.created_at
+            'created_at': asset.created_at.strftime('%d/%m/%Y %H:%M')
         }
         asset_list.append(asset)
     return jsonify({'assets': asset_list})
@@ -124,7 +110,7 @@ def asset(id):
         'category': asset.category.category_name,
         'department': asset.department.department_name,
         'allocated_to': asset.user_allocated_assets.username if asset.allocated_to else 'Not allocated',
-        'created_at': asset.created_at
+        'created_at': asset.created_at.strftime('%d/%m/%Y %H:%M')
     }
     return jsonify({'asset': asset_data})
 
@@ -173,6 +159,8 @@ def delete_asset(id):
 @app.route('/requests')
 #@login_required
 def requests():
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
     requests = Request.query.all()
     request_data = []
     for request in requests:
@@ -186,7 +174,7 @@ def requests():
             'urgency': request.urgency,
             'reason': request.reason,
             'status': request.request_status.status_name,
-            'created_at': request.created_at
+            'created_at': request.created_at.strftime('%d/%m/%Y %H:%M')
         }
         request_data.append(request)
     return jsonify({'requests': request_data})
@@ -194,6 +182,8 @@ def requests():
 @app.route('/request/<int:id>')
 #@login_required
 def request(id):
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
     request = Request.query.get_or_404(id)
     request_data = {
         'request_type': request.request_type,
@@ -205,21 +195,43 @@ def request(id):
         'urgency': request.urgency,
         'reason': request.reason,
         'status': request.request_status.status_name,
-        'created_at': request.created_at
+        'created_at': request.created_at.strftime('%d/%m/%Y %H:%M')
     }
     return jsonify({'request': request_data})
 
 @app.route('/new_request', methods=['POST'])
-#@login_required    
+#@login_required 
 def add_request():
-    data = request.get_json()
-    new_request = Request(request_type=data.get("request_type"), asset_id=data.get("asset_id"),
-                        requested_by=current_user.id, department_id=data.get("department_id"),
-                        quantity=data.get("quantity"), urgency=data.get("urgency"), reason=data.get("reason"),
-                        status_id=data.get("status_id"), created_at=datetime.utcnow())
-    db.session.add(new_request)
-    db.session.commit()
-    return jsonify({'message': 'Request added successfully'})
+    if request.method == 'POST':
+        data = request.get_json()
+
+        request_type = data.get("request_type")
+        asset_id = data.get("asset_id")
+        department_id = data.get("department_id")
+        quantity = data.get("quantity")
+        urgency = data.get("urgency")
+        reason = data.get("reason")
+
+        user_department_ids = [dept.id for dept in current_user.departments]
+        if department_id not in user_department_ids:
+            return jsonify({'error': 'User is not part of the specified department'}), 403
+
+        new_request = Request(
+            request_type=request_type,
+            asset_id=asset_id,
+            requested_by=current_user.id,
+            department_id=department_id,
+            quantity=quantity,
+            urgency=urgency,
+            reason=reason,
+            status_id=1,  
+            created_at=datetime.utcnow()
+        )
+
+        db.session.add(new_request)
+        db.session.commit()
+
+        return jsonify({'message': 'Request added successfully'}), 201
 
 @app.route('/request/<int:id>/review', methods=['POST'])
 #@login_required
@@ -245,6 +257,8 @@ def review_request(id):
 @app.route('/requests/pending', methods=['GET'])
 #@login_required
 def pending_requests():
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
     requests = Request.query.filter_by(status_id=1).all()
     request_data = []
     for request in requests:
@@ -258,7 +272,7 @@ def pending_requests():
             'urgency': request.urgency,
             'reason': request.reason,
             'status': request.request_status.status_name,
-            'created_at': request.created_at
+            'created_at': request.created_at.strftime('%d/%m/%Y %H:%M')
         }
         request_data.append(request)
     return jsonify({'requests': request_data})
@@ -281,7 +295,7 @@ def departments():
                     "urgency": request.urgency,
                     "reason": request.reason,
                     "status": request.request_status.status_name,
-                    "created_at": request.created_at
+                    "created_at": request.created_at.strftime('%d/%m/%Y %H:%M')
                 }
                 for request in department.requests
             ],
@@ -306,7 +320,7 @@ def department(id):
                 "urgency": request.urgency,
                 "reason": request.reason,
                 "status": request.request_status.status_name,
-                "created_at": request.created_at
+                "created_at": request.created_at.strftime('%d/%m/%Y %H:%M')
             }
             for request in department.requests
         ],
@@ -328,15 +342,32 @@ def categories():
 @app.route('/my_profile', methods=['GET'])
 #@login_required
 def my_profile():
+    user = current_user
     user_data = {
-        'username': current_user.username,
-        'email': current_user.email,
-        'department': current_user.department.department_name,
-        'my allocated assets': [asset.asset_name for asset in user.allocated_assets],
-        'role': current_user.role,
-        'created_at': current_user.created_at
+        'username': user.username,
+        'email': user.email,
+        'department': user.department.department_name,
+        'allocated assets': [asset.asset_name for asset in user.allocated_assets],
+        'role': user.role,
+        'created_at': user.created_at.strftime('%d/%m/%Y %H:%M')
     }
     return jsonify({'user': user_data})
+
+
+@app.route('/users', methods=["GET"])
+def home():
+    users = Users.query.all()
+    user_list = []
+    for user in users:
+        user = {
+            'username': user.username,
+            'email': user.email,
+            'department': user.department.department_name,
+            'role': user.role,
+            'created_at': user.created_at
+        }
+        user_list.append(user)
+    return jsonify({'users': user_list})       
 
 @app.route('/user/<int:id>', methods=['GET', 'POST'])
 #@login_required
