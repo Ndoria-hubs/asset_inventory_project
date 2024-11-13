@@ -41,6 +41,8 @@ def Register():
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
+    department_id = data.get("department_id")
+    role = data.get("role")
 
     if not email or not password:
         return jsonify({"message": "Email and password are required"}), 400
@@ -49,7 +51,14 @@ def Register():
     if user:
         return jsonify({"message": "Email already registered, please choose a different one"}), 409
  
-    new_user = Users(username=username, email=email, password=bcrypt.generate_password_hash(password).decode('utf-8'))
+    new_user = Users(
+        username=username,
+        email=email,
+        password=bcrypt.generate_password_hash(password).decode('utf-8'),
+        department_id=department_id,
+        role=role,
+        created_at=datetime.utcnow()
+    )
     db.session.add(new_user)
     db.session.commit()
     return jsonify({"message": "User created successfully"}), 201
