@@ -1,6 +1,6 @@
 from server import app, db, bcrypt
-from flask import request, jsonify
-from server.models import Users, Department, Category, Asset, RequestStatus, Request, ReviewRequests
+from flask import jsonify, request
+from server.models import Users, Department, Category, Asset, RequestStatus,Request,ReviewRequests
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
 
@@ -33,7 +33,7 @@ def setup():
     return jsonify(message="Admin user created successfully."), 201
 
 @app.route('/register', methods=["POST", "GET"])
-#@login_required
+@login_required
 def Register():
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
@@ -166,47 +166,47 @@ def delete_asset(id):
     return jsonify({'message': 'Asset deleted successfully'})
 
 @app.route('/requests')
-#@login_required
+@login_required
 def requests():
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
     requests = Request.query.all()
     request_data = []
-    for request in requests:
-        request = {
-            'request_type': request.request_type,
-            'asset_name': request.related_asset.asset_name,
-            'asset_image': request.related_asset.image_url,
-            'requested_by': request.user_requesting.username,
-            'department': request.department_requesting.department_name,
-            'quantity': request.quantity,
-            'urgency': request.urgency,
-            'reason': request.reason,
-            'status': request.request_status.status_name,
-            'created_at': request.created_at.strftime('%d/%m/%Y %H:%M')
+    for req in requests:
+        req = {
+            'request_type': req.request_type,
+            'asset_name': req.related_asset.asset_name,
+            'asset_image': req.related_asset.image_url,
+            'requested_by': req.user_requesting.username,
+            'department': req.department_requesting.department_name,
+            'quantity': req.quantity,
+            'urgency': req.urgency,
+            'reason': req.reason,
+            'status': req.request_status.status_name,
+            'created_at': req.created_at.strftime('%d/%m/%Y %H:%M')
         }
-        request_data.append(request)
+        request_data.append(req)
     return jsonify({'requests': request_data})
 
 @app.route('/request/<int:id>')
 #@login_required
-def request(id):
+def get_request(id):
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
-    request = Request.query.get_or_404(id)
+    get_request = Request.query.get_or_404(id)
     request_data = {
-        'request_type': request.request_type,
-        'asset_name': request.related_asset.asset_name,
-        'asset_image': request.related_asset.image_url,
-        'requested_by': request.user_requesting.username,
-        'department': request.department_requesting.department_name,
-        'quantity': request.quantity,
-        'urgency': request.urgency,
-        'reason': request.reason,
-        'status': request.request_status.status_name,
-        'created_at': request.created_at.strftime('%d/%m/%Y %H:%M')
+        'request_type': get_request.request_type,
+        'asset_name': get_request.related_asset.asset_name,
+        'asset_image': get_request.related_asset.image_url,
+        'requested_by': get_request.user_requesting.username,
+        'department': get_request.department_requesting.department_name,
+        'quantity': get_request.quantity,
+        'urgency': get_request.urgency,
+        'reason': get_request.reason,
+        'status': get_request.request_status.status_name,
+        'created_at': get_request.created_at.strftime('%d/%m/%Y %H:%M')
     }
-    return jsonify({'request': request_data})
+    return jsonify({'get_request': request_data})
 
 @app.route('/new_request', methods=['POST'])
 #@login_required 
@@ -248,7 +248,7 @@ def review_request(id):
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
     data = request.get_json()
-    request = Request.query.get_or_404(id)
+    get_request = Request.query.get_or_404(id)
     if data.get("status") == 2:
         new_review = ReviewRequests(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
                                 review_comment=data.get("review_comment"), reviewed_at=datetime.utcnow())
@@ -270,20 +270,20 @@ def pending_requests():
         return jsonify({'message': 'Unauthorized to access this page'}), 403
     requests = Request.query.filter_by(status_id=1).all()
     request_data = []
-    for request in requests:
-        request = {
-            'request_type': request.request_type,
-            'asset_name': request.related_asset.asset_name,
-            'asset_image': request.related_asset.image_url,
-            'requested_by': request.user_requesting.username,
-            'department': request.department_requesting.department_name,
-            'quantity': request.quantity,
-            'urgency': request.urgency,
-            'reason': request.reason,
-            'status': request.request_status.status_name,
-            'created_at': request.created_at.strftime('%d/%m/%Y %H:%M')
+    for req in requests:
+        req = {
+            'request_type': req.request_type,
+            'asset_name': req.related_asset.asset_name,
+            'asset_image': req.related_asset.image_url,
+            'requested_by': req.user_requesting.username,
+            'department': req.department_requesting.department_name,
+            'quantity': req.quantity,
+            'urgency': req.urgency,
+            'reason': req.reason,
+            'status': req.request_status.status_name,
+            'created_at': req.created_at.strftime('%d/%m/%Y %H:%M')
         }
-        request_data.append(request)
+        request_data.append(req)
     return jsonify({'requests': request_data})
 
 @app.route('/departments', methods=['GET'])
