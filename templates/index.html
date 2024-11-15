@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="container">
+    <h1>Welcome</h1>
+    <form id="auth-form" action="{{ url_for('login') }}" method="POST">
+        <input type="text" 
+               name="username"
+               placeholder="Username"
+               class="input-field" />
+        <input type="password" 
+               name="password"
+               placeholder="Password"
+               class="input-field" />
+        <input type="submit"
+               value="Login"
+               class="btn btn-login"
+               onclick="setActionForm('login'); return false;" />
+        <input type="button"
+               value="Register"
+               class="btn btn-login"
+               onclick="setActionForm('register');" />
+    </form>
+</div>
+
+<script>
+    function setActionForm(action) {
+        let form = document.getElementById('auth-form');
+        if (action === 'login') {
+            form.action = "{{ url_for('login') }}";
+            form.method = 'POST';  // Ensure the method is set to POST for login
+        } else if (action === 'register') {
+            form.action = "{{ url_for('register') }}";
+            form.method = 'POST';  // Ensure the method is set to POST for register
+        }
+        
+        // After setting the form action, submit the form
+        form.submit();
+    }
+</script>
+
+{% endblock %}

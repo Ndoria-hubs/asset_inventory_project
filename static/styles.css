@@ -1,0 +1,84 @@
+/* Global Styles */
+body {
+  background-color: #38A3A5; /* Teal background */
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif; /* Font choices */
+  color: #000; /* Black text color */
+  display: flex; /* Flexbox container */
+  flex-direction: column; /* Vertical layout */
+  justify-content: center; /* Vertically center content */
+  height: 100vh; /* Full height of the viewport */
+  margin: 0; /* Remove margin */
+  text-align: center; /* Center text inside header */
+}
+
+/* Header Styles */
+header {
+  width: 100%; /* Full width of the viewport */
+  background-color: #57CC99; /* Light green background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow under the header */
+  padding: 20px 0; /* Vertical padding */
+  font-size: 24px; /* Larger font for header text */
+  font-weight: bold; /* Bold text */
+}
+
+/* Main Content Styles */
+.container {
+  width: 90%; /* Allow content to use most of the width */
+  max-width: 600px; /* Limit content width on large screens */
+  margin: 20px auto; /* Center container horizontally */
+  padding: 20px;
+  background-color: white; /* White background for form sections */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow */
+}
+
+/* Form Styles */
+form {
+  display: flex; /* Flex layout for forms */
+  flex-direction: column; /* Stack form elements vertically */
+  gap: 15px; /* Space between form elements */
+}
+
+input[type="text"], input[type="password"] {
+  padding: 12px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+button {
+  padding: 12px;
+  background-color: #57CC99; /* Green button */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth color change on hover */
+}
+
+button:hover {
+  background-color: #38A3A5; /* Darker green on hover */
+}
+
+/* Error Message */
+.error {
+  color: red;
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  header {
+    font-size: 20px; /* Slightly smaller text for small screens */
+  }
+
+  .container {
+    width: 95%; /* Adjust form container to be almost full width on small screens */
+  }
+
+  input[type="text"], input[type="password"], button {
+    font-size: 14px; /* Smaller font size for mobile devices */
+  }
+}
