@@ -57,7 +57,8 @@ def Register():
         password=bcrypt.generate_password_hash(password).decode('utf-8'),
         department_id=department_id,
         role=role,
-        created_at=datetime.utcnow()
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
     )
     db.session.add(new_user)
     db.session.commit()
@@ -66,7 +67,7 @@ def Register():
 @app.route('/login', methods=["POST"])
 def login():
     if current_user.is_authenticated:
-        return jsonify({"message": "Already logged in"}), 200
+        return jsonify({"message": "User already logged in"}), 200
 
     data = request.get_json()
     email = data.get("email")
@@ -83,13 +84,13 @@ def login():
         return jsonify({"message": "Invalid email or password"}), 401
 
 @app.route('/logout')
-#@login_required
+@login_required
 def logout():
     logout_user()
     return jsonify({"message": "Logged out successfully"}), 200
 
 @app.route('/assets')
-#@login_required
+@login_required
 def assets():
     assets = Asset.query.all()
     asset_list = []
@@ -102,13 +103,14 @@ def assets():
             'category': asset.category.category_name,
             'department': asset.department.department_name,
             'allocated_to': asset.user_allocated_assets.username if asset.allocated_to else 'Not allocated',
-            'created_at': asset.created_at.strftime('%d/%m/%Y %H:%M')
+            'created_at': asset.created_at.strftime('%d/%m/%Y %H:%M'),
+            'updated_at': asset.updated_at.strftime('%d/%m/%Y %H:%M') if asset.updated_at else 'Not updated'
         }
         asset_list.append(asset)
     return jsonify({'assets': asset_list})
 
 @app.route('/asset/<int:id>')
-#@login_required
+@login_required
 def asset(id):
     asset = Asset.query.get(id)
     asset_data = {
@@ -119,13 +121,14 @@ def asset(id):
         'category': asset.category.category_name,
         'department': asset.department.department_name,
         'allocated_to': asset.user_allocated_assets.username if asset.allocated_to else 'Not allocated',
-        'created_at': asset.created_at.strftime('%d/%m/%Y %H:%M')
+        'created_at': asset.created_at.strftime('%d/%m/%Y %H:%M'),
+        'updated_at': asset.updated_at.strftime('%d/%m/%Y %H:%M') if asset.updated_at else 'Not updated'
     }
     return jsonify({'asset': asset_data})
 
 
 @app.route('/add_asset', methods=['POST'])
-#@login_required
+@login_required
 def add_asset():
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
@@ -133,13 +136,13 @@ def add_asset():
     new_asset = Asset(asset_name=data.get("asset_name"), description=data.get("description"),
                     category_id=data.get('category_id'),image_url= data.get("image_url"), status=data.get("status"),
                     department_id=data.get("department_id"),allocated_to=data.get("allocated_to"),
-                    created_at=datetime.utcnow())
+                    created_at=datetime.utcnow(), updated_at=datetime.utcnow())
     db.session.add(new_asset)
     db.session.commit()
     return jsonify({'message': 'Asset added successfully'})
 
 @app.route('/asset/<int:id>/edit', methods=['POST'])
-#@login_required
+@login_required
 def edit_asset(id):
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
@@ -152,11 +155,12 @@ def edit_asset(id):
     asset.status = data.get("status", asset.status)
     asset.department_id = data.get("department_id", asset.department_id)
     asset.allocated_to = data.get("allocated_to", asset.allocated_to)
+    asset.updated_at = datetime.utcnow()
     db.session.commit()
     return jsonify({'message': 'Asset updated successfully'})
 
-@app.route('/asset/<int:id>/delete', methods=['POST'])
-#@login_required
+@app.route('/asset/<int:id>/delete', methods=['DELETE'])
+@login_required
 def delete_asset(id):
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
@@ -183,13 +187,14 @@ def requests():
             'urgency': req.urgency,
             'reason': req.reason,
             'status': req.request_status.status_name,
-            'created_at': req.created_at.strftime('%d/%m/%Y %H:%M')
+            'created_at': req.created_at.strftime('%d/%m/%Y %H:%M'),
+            'updated_at': req.updated_at.strftime('%d/%m/%Y %H:%M') if req.updated_at else 'Not updated'
         }
         request_data.append(req)
     return jsonify({'requests': request_data})
 
 @app.route('/request/<int:id>')
-#@login_required
+@login_required
 def get_request(id):
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
@@ -204,12 +209,13 @@ def get_request(id):
         'urgency': get_request.urgency,
         'reason': get_request.reason,
         'status': get_request.request_status.status_name,
-        'created_at': get_request.created_at.strftime('%d/%m/%Y %H:%M')
+        'created_at': get_request.created_at.strftime('%d/%m/%Y %H:%M'),
+        'updated_at': get_request.updated_at.strftime('%d/%m/%Y %H:%M') if get_request.updated_at else 'Not updated'
     }
     return jsonify({'get_request': request_data})
 
 @app.route('/new_request', methods=['POST'])
-#@login_required 
+@login_required 
 def add_request():
     if request.method == 'POST':
         data = request.get_json()
@@ -221,9 +227,8 @@ def add_request():
         urgency = data.get("urgency")
         reason = data.get("reason")
 
-        user_department_ids = [dept.id for dept in current_user.departments]
-        if department_id not in user_department_ids:
-            return jsonify({'error': 'User is not part of the specified department'}), 403
+        if current_user.department_id != department_id:
+            return jsonify({'message': 'you can only make request for your department'}), 403
 
         new_request = Request(
             request_type=request_type,
@@ -234,7 +239,8 @@ def add_request():
             urgency=urgency,
             reason=reason,
             status_id=1,  
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
         )
 
         db.session.add(new_request)
@@ -242,29 +248,65 @@ def add_request():
 
         return jsonify({'message': 'Request added successfully'}), 201
 
+@app.route('/request/<int:id>/edit', methods=['POST'])
+@login_required
+def edit_request(id):
+    # only the requester can edit the request
+    get_request = Request.query.get_or_404(id)
+    if current_user.id != get_request.requested_by:
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    data = request.get_json()
+
+    get_request.request_type = data.get("request_type", get_request.request_type)
+    get_request.asset_id = data.get("asset_id", get_request.asset_id)
+    get_request.department_id = data.get("department_id", get_request.department_id)
+    get_request.quantity = data.get("quantity", get_request.quantity)
+    get_request.urgency = data.get("urgency", get_request.urgency)
+    get_request.reason = data.get("reason", get_request.reason)
+    get_request.updated_at = datetime.utcnow()
+
+    db.session.commit()
+    return jsonify({'message': 'Request updated successfully'})
+
 @app.route('/request/<int:id>/review', methods=['POST'])
-#@login_required
+@login_required
 def review_request(id):
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
     data = request.get_json()
     get_request = Request.query.get_or_404(id)
-    if data.get("status") == 2:
-        new_review = ReviewRequests(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
+    
+    if get_request.status_id != 1:
+        return jsonify({'message': 'Request has already been reviewed'}), 400
+    
+    elif data.get("status_id") == 2:
+        new_review = ReviewRequests(request_id=id, reviewed_by=current_user.id, status_id=data.get("status_id"),
                                 review_comment=data.get("review_comment"), reviewed_at=datetime.utcnow())
+        Request.query.filter_by(id=id).update({'status_id': 2})
         db.session.add(new_review)
         db.session.commit()
         return jsonify({'message': 'Request approved successfully'})
     else:
-        new_review = ReviewRequests(request_id=id, reviewed_by=current_user.id, status=data.get("status"),
+        new_review = ReviewRequests(request_id=id, reviewed_by=current_user.id, status_id=data.get("status_id"),
                                 review_comment=data.get("review_comment"), reviewed_at=datetime.utcnow())
+        Request.query.filter_by(id=id).update({'status_id': 3})
         db.session.add(new_review)
         db.session.commit()
         return jsonify({'message': 'Request rejected, reason: {}'.format(data.get("review_comment"))})
     
+@app.route('/request/<int:id>/delete', methods=['DELETE'])
+@login_required
+def delete_request(id):
+    get_request = Request.query.get_or_404(id)
+    if current_user.id != get_request.requested_by:
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    db.session.delete(get_request)
+    db.session.commit()
+    return jsonify({'message': 'Request deleted successfully'})
+    
 
 @app.route('/requests/pending', methods=['GET'])
-#@login_required
+@login_required
 def pending_requests():
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
@@ -287,7 +329,7 @@ def pending_requests():
     return jsonify({'requests': request_data})
 
 @app.route('/departments', methods=['GET'])
-#@login_required
+@login_required
 def departments():
     departments = Department.query.all()
     department_data = {}
@@ -313,7 +355,7 @@ def departments():
     return jsonify({'departments': department_data})
 
 @app.route('/department/<int:id>')
-#@login_required
+@login_required
 def department(id):
     department = Department.query.get_or_404(id)
     department_data = {
@@ -337,8 +379,36 @@ def department(id):
     }
     return jsonify({'department': department_data})
 
+@app.route('/ReviewRequests', methods=['GET'])
+@login_required
+def review_requests():
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    reviews = ReviewRequests.query.all()
+    review_data = []
+    for review in reviews:
+        review = {
+            'request_id': review.request_id,
+            'reviewed_by': review.reviewed_by_user.username,
+            'status': review.status.status_name,
+            'review_comment': review.review_comment,
+            'reviewed_at': review.reviewed_at.strftime('%d/%m/%Y %H:%M')
+        }
+        review_data.append(review)
+    return jsonify({'reviews': review_data})
+
+@app.route('/review/<int:id>/delete', methods=['DELETE'])
+@login_required
+def delete_review(id):
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+    review = ReviewRequests.query.get_or_404(id)
+    db.session.delete(review)
+    db.session.commit()
+    return jsonify({'message': 'Review deleted successfully'})
+
 @app.route('/categories', methods=['GET'])
-#@login_required
+@login_required
 def categories():
     categories = Category.query.all()
     category_data = {}
@@ -349,7 +419,7 @@ def categories():
     return jsonify({'categories': category_data})
 
 @app.route('/my_profile', methods=['GET'])
-#@login_required
+@login_required
 def my_profile():
     user = current_user
     user_data = {
@@ -358,10 +428,10 @@ def my_profile():
         'department': user.department.department_name,
         'allocated assets': [asset.asset_name for asset in user.allocated_assets],
         'role': user.role,
-        'created_at': user.created_at.strftime('%d/%m/%Y %H:%M')
+        'created_at': user.created_at.strftime('%d/%m/%Y %H:%M'),
+        'updated_at': user.updated_at.strftime('%d/%m/%Y %H:%M') if user.updated_at else 'Not updated'
     }
     return jsonify({'user': user_data})
-
 
 @app.route('/users', methods=["GET"])
 def home():
@@ -373,13 +443,14 @@ def home():
             'email': user.email,
             'department': user.department.department_name,
             'role': user.role,
-            'created_at': user.created_at
+            'created_at': user.created_at.strftime('%d/%m/%Y %H:%M'),
+            'updated_at': user.updated_at.strftime('%d/%m/%Y %H:%M') if user.updated_at else 'Not updated'
         }
         user_list.append(user)
     return jsonify({'users': user_list})       
 
 @app.route('/user/<int:id>', methods=['GET', 'POST'])
-#@login_required
+@login_required
 def user(id):
     user = Users.query.get_or_404(id)
     user_data = {
@@ -388,12 +459,13 @@ def user(id):
         'department': user.department.department_name,
         'allocated assets': [asset.asset_name for asset in user.allocated_assets],
         'role': user.role,
-        'created_at': user.created_at
+        'created_at': user.created_at.strftime('%d/%m/%Y %H:%M'),
+        'updated_at': user.updated_at.strftime('%d/%m/%Y %H:%M') if user.updated_at else 'Not updated'
         }
     return jsonify({'user': user_data})
  
 @app.route('/user/<int:id>/edit', methods=['POST'])
-#@login_required
+@login_required
 def edit_user(id):
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
@@ -402,6 +474,26 @@ def edit_user(id):
     user.username = user.username
     user.email = user.email
     user.role = data.get("role", user.role)
-    user.department_id = data.get("department_id", user.department_id)
+    user.department_id = data.get("department_id", user.department_id),
+    user.updated_at = datetime.utcnow()
     db.session.commit()
     return jsonify({'message': 'User updated successfully'})
+
+@app.route('/user/<int:id>/delete', methods=['DELETE'])
+@login_required
+def delete_user(id):
+    if current_user.role != 'Admin':
+        return jsonify({'message': 'Unauthorized to access this page'}), 403
+
+    user_to_delete = Users.query.get_or_404(id)
+    allocated_assets = Asset.query.filter_by(allocated_to=user_to_delete.id).all()
+
+    for asset in allocated_assets:
+        asset.allocated_to = None 
+
+    db.session.commit()
+
+    db.session.delete(user_to_delete)
+    db.session.commit()
+
+    return jsonify({'message': 'User and allocated assets un-allocated successfully'}), 200

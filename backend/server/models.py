@@ -14,10 +14,12 @@ class Users(db.Model, UserMixin):
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=False)
     role = db.Column(db.String(30), nullable=False, default='User')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     requests = db.relationship('Request', backref='user_requests', lazy=True)
     request_reviews = db.relationship('ReviewRequests', backref='written_reviews', lazy=True) 
-    allocated_assets = db.relationship('Asset', backref='allocated_user', lazy=True)
+    allocated_assets = db.relationship('Asset', backref='allocated_user', lazy=True, cascade='all')
+    user_department = db.relationship('Department', backref='user_department', lazy=True)
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}')"
@@ -50,9 +52,10 @@ class Asset(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     image_url = db.Column(db.String(255))
     status = db.Column(db.String(20)) 
-    allocated_to = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    allocated_to = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'),default=None, nullable=True)
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     requests = db.relationship('Request', backref='asset', lazy=True)
     user_allocated_assets = db.relationship('Users', backref='allocated_asset', lazy=True)
@@ -81,6 +84,7 @@ class Request(db.Model):
     reason = db.Column(db.Text)
     status_id = db.Column(db.Integer, db.ForeignKey('request_status.id'), nullable=False, default=1)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     reviews = db.relationship('ReviewRequests', back_populates='request', lazy=True)
     user_requesting = db.relationship('Users', backref='user_requesting', lazy=True)
