@@ -1,43 +1,23 @@
 {% extends 'base.html' %}
 
 {% block body %}
+  
+        <!-- Left Container (Image) -->
+        <div class="left-container">
+            <img src="{{ url_for('static', filename='images/images.jpeg') }}" alt="Welcome Image" class="img-fluid" style="width: 100%; height: 100%;" />
+        </div>
 
-<div class="container">
-    <h1>Welcome</h1>
-    <form id="auth-form" action="{{ url_for('login') }}" method="POST">
-        <input type="text" 
-               name="username"
-               placeholder="Username"
-               class="input-field" />
-        <input type="password" 
-               name="password"
-               placeholder="Password"
-               class="input-field" />
-        <input type="submit"
-               value="Login"
-               class="btn btn-login"
-               onclick="setActionForm('login'); return false;" />
-        <input type="button"
-               value="Register"
-               class="btn btn-login"
-               onclick="setActionForm('register');" />
-    </form>
-</div>
+        <!-- Right Container (Login Form) -->
+        <div class="right-container">
+            <div class="form-container">
+                <h1>Welcome. Let's get started!</h1>
 
-<script>
-    function setActionForm(action) {
-        let form = document.getElementById('auth-form');
-        if (action === 'login') {
-            form.action = "{{ url_for('login') }}";
-            form.method = 'POST';  // Ensure the method is set to POST for login
-        } else if (action === 'register') {
-            form.action = "{{ url_for('register') }}";
-            form.method = 'POST';  // Ensure the method is set to POST for register
-        }
-        
-        // After setting the form action, submit the form
-        form.submit();
-    }
-</script>
+                <form action="{{ url_for('login') }}" method="POST">
+                    <input type="text" name="username" placeholder="Username" class="input-field" required>
+                    <input type="password" name="password" placeholder="Password" class="input-field" required>
+                    <input type="submit" value="Login" class="btn btn-large">
+                </form>
+            </div>
+        </div>
 
 {% endblock %}

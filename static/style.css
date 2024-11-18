@@ -1,0 +1,145 @@
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color:  #22577A;  /* Teal-like background for the page */
+    color: #ffffff;  /* Deep Blue text color */
+    line-height: 1.6;
+    padding: 0;  /* No padding around the page */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Page container with two sections */
+.page-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    height: 100%;
+}
+
+/* Left Container - Image */
+.left-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #22577A;  /* Deep Blue background for left side */
+    height: 100%;  /* Full height */
+}
+
+.image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* Right Container - Login Form */
+.right-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #22577A;  /* Deep Blue background for the right side */
+    height: 100%;  /* Full height */
+    padding: 20px;
+}
+
+.form-container {
+    background-color: #ffffff;  /* White background for the form */
+    color: #22577A;  /* Deep Blue text */
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+h1 {
+    color: #22577A;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #57CC99;  /* Soft Green border */
+    border-radius: 5px;
+    font-size: 1.1rem;
+    color: #22577A;
+}
+
+.input-field:focus {
+    border-color: #38A3A5;  /* Teal-like color on focus */
+    outline: none;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #38A3A5;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #57CC99;
+}
+
+.btn-large {
+    font-size: 1.5rem;
+    padding: 15px 30px;
+    width: 100%;
+}
+
+/* Small screen styling */
+@media (max-width: 768px) {
+    .page-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .left-container, .right-container {
+        flex: none;
+        width: 100%;
+        height: auto;
+    }
+
+    .form-container {
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .input-field {
+        font-size: 1rem;
+    }
+
+    .btn-large {
+        font-size: 1.3rem;
+        padding: 15px 25px;
+    }
+
+    footer p {
+        font-size: 0.9rem;
+    }
+}
