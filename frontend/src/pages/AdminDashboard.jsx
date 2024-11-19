@@ -16,6 +16,9 @@ function AdminDashboard() {
     department_id: '',
   });
   const [editingAsset, setEditingAsset] = useState(null);
+  const [sortKey, setSortKey] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterCondition, setFilterCondition] = useState('');
 
   useEffect(() => {
     if (selectedSection === 'viewAssets' || selectedSection === 'manageAssets') {
@@ -105,6 +108,31 @@ function AdminDashboard() {
     }
   };
 
+  const handleSort = (e) => {
+    setSortKey(e.target.value);
+  };
+
+  const handleFilterCategory = (e) => {
+    setFilterCategory(e.target.value);
+  };
+
+  const handleFilterCondition = (e) => {
+    setFilterCondition(e.target.value);
+  };
+
+  const filteredAssets = assets.filter(asset => {
+    const categoryMatch = filterCategory ? asset.category_id === filterCategory : true;
+    const conditionMatch = filterCondition ? asset.condition === filterCondition : true;
+    return categoryMatch && conditionMatch;
+  });
+
+  const sortedAssets = filteredAssets.sort((a, b) => {
+    if (sortKey) {
+      return a[sortKey] < b[sortKey] ? -1 : 1;
+    }
+    return 0;
+  });
+
   return (
     <div style={styles.adminDashboard}>
       <div style={styles.sidebar}>
@@ -123,9 +151,32 @@ function AdminDashboard() {
         {selectedSection === 'viewAssets' && (
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>All Assets</h2>
+
+            <div style={styles.filterContainer}>
+              <select onChange={handleSort} value={sortKey} style={styles.select}>
+                <option value="">Sort by</option>
+                <option value="asset_name">Name</option>
+                <option value="condition">Condition</option>
+                <option value="status">Status</option>
+              </select>
+
+              <select onChange={handleFilterCategory} value={filterCategory} style={styles.select}>
+                <option value="">Filter by Category</option>
+                <option value="1">Electronics</option>
+                <option value="2">Furniture</option>
+              </select>
+
+              <select onChange={handleFilterCondition} value={filterCondition} style={styles.select}>
+                <option value="">Filter by Condition</option>
+                <option value="New">New</option>
+                <option value="Used">Used</option>
+                <option value="Damaged">Damaged</option>
+              </select>
+            </div>
+
             <div style={styles.assetGrid}>
-              {assets.length > 0 ? (
-                assets.map(asset => (
+              {sortedAssets.length > 0 ? (
+                sortedAssets.map(asset => (
                   <div key={asset.id} style={styles.assetCard}>
                     <img src={asset.image_url} alt={asset.asset_name} style={styles.assetImage} />
                     <h4>{asset.asset_name}</h4>
@@ -176,72 +227,6 @@ function AdminDashboard() {
             </table>
           </div>
         )}
-
-        {selectedSection === 'manageAssets' && (
-          <div style={styles.section}>
-            <h2 style={styles.sectionTitle}>{editingAsset ? "Edit Asset" : "Add New Asset"}</h2>
-            <form onSubmit={editingAsset ? handleUpdateAsset : handleAddAsset} style={styles.form}>
-              <input
-                type="text"
-                placeholder="Asset Name"
-                value={editingAsset ? editingAsset.asset_name : newAsset.asset_name}
-                onChange={(e) =>
-                  editingAsset
-                    ? setEditingAsset({ ...editingAsset, asset_name: e.target.value })
-                    : setNewAsset({ ...newAsset, asset_name: e.target.value })
-                }
-                style={styles.input}
-              />
-              <input
-                type="text"
-                placeholder="Description"
-                value={editingAsset ? editingAsset.description : newAsset.description}
-                onChange={(e) =>
-                  editingAsset
-                    ? setEditingAsset({ ...editingAsset, description: e.target.value })
-                    : setNewAsset({ ...newAsset, description: e.target.value })
-                }
-                style={styles.input}
-              />
-              <input
-                type="text"
-                placeholder="Category ID"
-                value={editingAsset ? editingAsset.category_id : newAsset.category_id}
-                onChange={(e) =>
-                  editingAsset
-                    ? setEditingAsset({ ...editingAsset, category_id: e.target.value })
-                    : setNewAsset({ ...newAsset, category_id: e.target.value })
-                }
-                style={styles.input}
-              />
-              <input
-                type="text"
-                placeholder="Condition"
-                value={editingAsset ? editingAsset.condition : newAsset.condition}
-                onChange={(e) =>
-                  editingAsset
-                    ? setEditingAsset({ ...editingAsset, condition: e.target.value })
-                    : setNewAsset({ ...newAsset, condition: e.target.value })
-                }
-                style={styles.input}
-              />
-              <input
-                type="text"
-                placeholder="Department ID"
-                value={editingAsset ? editingAsset.department_id : newAsset.department_id}
-                onChange={(e) =>
-                  editingAsset
-                    ? setEditingAsset({ ...editingAsset, department_id: e.target.value })
-                    : setNewAsset({ ...newAsset, department_id: e.target.value })
-                }
-                style={styles.input}
-              />
-              <button type="submit" style={styles.submitButton}>
-                {editingAsset ? "Update Asset" : "Add Asset"}
-              </button>
-            </form>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -271,115 +256,101 @@ const styles = {
   navList: {
     listStyleType: 'none',
     padding: 0,
-    marginBottom: '20px',
+    marginBottom: 'auto',
   },
   navItem: {
-    padding: '10px 0',
+    fontSize: '18px',
     cursor: 'pointer',
-    color: '#bdc3c7',
-    transition: 'color 0.2s',
+    padding: '10px 0',
+    borderBottom: '1px solid #ecf0f1',
+    transition: 'background-color 0.3s',
   },
   logoutButton: {
-    padding: '10px 20px',
     backgroundColor: '#e74c3c',
-    color: '#fff',
     border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
+    padding: '10px',
     fontSize: '16px',
-    alignSelf: 'center',
+    color: 'white',
+    cursor: 'pointer',
     marginTop: '20px',
   },
   content: {
-    flexGrow: 1,
+    flex: 1,
     padding: '20px',
+    backgroundColor: 'white',
   },
   contentTitle: {
-    color: '#34495e',
-    fontSize: '24px',
-    fontWeight: '600',
+    fontSize: '30px',
+    fontWeight: 'bold',
     marginBottom: '20px',
   },
   section: {
-    backgroundColor: '#ecf0f1',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     marginBottom: '20px',
+  },
+  sectionTitle: {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    marginBottom: '15px',
+  },
+  filterContainer: {
+    display: 'flex',
+    gap: '15px',
+    marginBottom: '20px',
+  },
+  select: {
+    padding: '10px',
+    fontSize: '16px',
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    width: '200px',
   },
   assetGrid: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '10px',
+    gap: '20px',
   },
   assetCard: {
-    width: '200px',
     backgroundColor: '#fff',
-    padding: '10px',
+    padding: '15px',
+    border: '1px solid #ddd',
     borderRadius: '8px',
+    width: '200px',
     textAlign: 'center',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
   },
   assetImage: {
-    width: '100%',
-    height: '120px',
-    objectFit: 'cover',
-    borderRadius: '5px',
+    maxWidth: '100%',
+    borderRadius: '8px',
     marginBottom: '10px',
   },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    marginTop: '10px',
-    borderRadius: '8px',
-    overflow: 'hidden',
   },
   tableHeader: {
+    textAlign: 'left',
+    padding: '10px',
     backgroundColor: '#34495e',
     color: 'white',
-    padding: '10px',
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: '14px',
   },
   tableCell: {
     padding: '10px',
-    textAlign: 'center',
-    backgroundColor: '#ffffff',
     borderBottom: '1px solid #ddd',
-    fontSize: '14px',
   },
   approveButton: {
-    padding: '5px 10px',
-    marginRight: '5px',
-    backgroundColor: '#28a745',
-    color: 'white',
+    backgroundColor: '#2ecc71',
     border: 'none',
-    borderRadius: '4px',
+    color: 'white',
+    padding: '8px 12px',
+    marginRight: '10px',
     cursor: 'pointer',
   },
   rejectButton: {
-    padding: '5px 10px',
-    backgroundColor: '#dc3545',
-    color: 'white',
+    backgroundColor: '#e74c3c',
     border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-  },
-  submitButton: {
-    padding: '10px',
-    backgroundColor: '#3498db',
     color: 'white',
-    border: 'none',
-    borderRadius: '4px',
+    padding: '8px 12px',
     cursor: 'pointer',
-  },
-  input: {
-    marginBottom: '10px',
-    padding: '8px',
-    width: '100%',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
   },
 };
 

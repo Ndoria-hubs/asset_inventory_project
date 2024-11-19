@@ -14,6 +14,8 @@ function UserDashboard() {
   const [requests, setRequests] = useState([]);
   const [assets, setAssets] = useState([]);
   const [activeSection, setActiveSection] = useState('viewRequests');
+  const [assetNameFilter, setAssetNameFilter] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: 'asset_name', direction: 'asc' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,7 +55,7 @@ function UserDashboard() {
       await axios.post('http://localhost:3000/Requests', newRequest);
       setRequests([...requests, newRequest]);
       handleCancel();
-      setActiveSection('viewRequests'); // Redirect to view requests after submission
+      setActiveSection('viewRequests');
     } catch (error) {
       console.error("Error submitting request:", error);
     }
@@ -71,6 +73,28 @@ function UserDashboard() {
   const handleLogout = () => {
     navigate('/');
   };
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const filteredAssets = assets.filter(asset =>
+    asset.asset_name.toLowerCase().includes(assetNameFilter.toLowerCase())
+  );
+
+  const sortedAssets = filteredAssets.sort((a, b) => {
+    if (a[sortConfig.key] < b[sortConfig.key]) {
+      return sortConfig.direction === 'asc' ? -1 : 1;
+    }
+    if (a[sortConfig.key] > b[sortConfig.key]) {
+      return sortConfig.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
 
   return (
     <div style={styles.container}>
@@ -92,7 +116,7 @@ function UserDashboard() {
 
       <div style={styles.content}>
         <h1>User Dashboard</h1>
-        
+
         {activeSection === 'viewRequests' ? (
           <div style={styles.tableContainer}>
             <h2>My Requests</h2>
@@ -124,9 +148,20 @@ function UserDashboard() {
         ) : activeSection === 'viewAssets' ? (
           <div style={styles.assetContainer}>
             <h2>All Assets</h2>
+            <input
+              type="text"
+              placeholder="Filter by asset name"
+              value={assetNameFilter}
+              onChange={(e) => setAssetNameFilter(e.target.value)}
+              style={styles.input}
+            />
             {assets.length > 0 ? (
               <ul style={styles.assetList}>
-                {assets.map(asset => (
+                <li style={styles.assetItem}>
+                  <span onClick={() => handleSort('asset_name')} style={styles.sortableHeader}>Asset Name</span>
+                  <span onClick={() => handleSort('status')} style={styles.sortableHeader}>Status</span>
+                </li>
+                {sortedAssets.map(asset => (
                   <li key={asset.id} style={styles.assetItem}>
                     <img src={asset.image_url} alt={asset.asset_name} style={styles.assetImage} />
                     <h4>{asset.asset_name}</h4>
@@ -142,7 +177,6 @@ function UserDashboard() {
         ) : (
           <form onSubmit={handleSubmit} style={styles.form}>
             <h2>Create Request</h2>
-            
             <label style={styles.label}>Asset Type</label>
             <select
               value={assetType}
@@ -216,7 +250,7 @@ function UserDashboard() {
               style={styles.input}
             />
 
-            <label style={styles.label}>Created/Updated at</label>
+            <label style={styles.label}>Created At</label>
             <input
               type="text"
               value={createdAt}
@@ -224,13 +258,9 @@ function UserDashboard() {
               style={styles.input}
             />
 
-            <div style={styles.buttonContainer}>
-              <button type="button" onClick={handleCancel} style={styles.cancelButton}>
-                Cancel
-              </button>
-              <button type="submit" style={styles.submitButton}>
-                Submit
-              </button>
+            <div style={styles.formButtons}>
+              <button type="submit" style={styles.submitButton}>Submit</button>
+              <button type="button" onClick={handleCancel} style={styles.cancelButton}>Cancel</button>
             </div>
           </form>
         )}
