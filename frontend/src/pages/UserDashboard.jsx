@@ -180,16 +180,16 @@ function UserDashboard() {
             <div style={styles.profileHeader}>
               <div style={styles.imagePlaceholder}>
                 <label style={styles.imageText}>
-              {profileImage ? (
-                <img src={profileImage} alt="Profile" style={styles.profileImage} />
-              ) : (
-                <span>Add Photo</span>
-              )}
-              <input type="file" accept="image/*" onChange={handleImageFileChange} style={styles.fileInput} />
-              </label>
+                  {profileImage ? (
+                    <img src={profileImage} alt="Profile" style={styles.profileImage} />
+                  ) : (
+                    <span>Add Photo</span>
+                  )}
+                  <input type="file" accept="image/*" onChange={handleImageFileChange} style={styles.fileInput} />
+                </label>
+              </div>
             </div>
-            </div>
-
+        
             <div style={styles.profileInfoContainer}>
               <p><strong>Username:</strong> {user.username}</p>
               <p><strong>Email:</strong> {user.email}</p>
@@ -197,7 +197,7 @@ function UserDashboard() {
               <p><strong>Role:</strong> {user.role}</p>
               <p><strong>Account Created:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
               <p><strong>Last Updated:</strong> {new Date(user.updated_at).toLocaleDateString()}</p>
-
+        
               <div style={styles.passwordSection}>
                 <strong>Password: </strong>
                 <span>
@@ -211,6 +211,7 @@ function UserDashboard() {
                 </button>
               </div>
             </div>
+          </div>
         ) : activeSection === 'viewAssets' ? (
           <div style={styles.assetContainer}>
             <h2>All Assets</h2>
@@ -332,6 +333,7 @@ function UserDashboard() {
         )}
       </div>
     </div>
+    
   );
 }
 
