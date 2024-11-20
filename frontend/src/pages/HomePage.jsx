@@ -112,7 +112,10 @@ function HomePage() {
         </div>
         <nav style={styles.nav}>
           <Link to="/about" style={styles.navLink}>About Us</Link>
+<<<<<<< HEAD
           <Link to="/contacts" style={styles.navLink}>Contact Us</Link>
+=======
+>>>>>>> origin/victor
         </nav>
         <button onClick={handleNavigateToLogin} style={styles.signInButton}>Sign In</button>
       </header>

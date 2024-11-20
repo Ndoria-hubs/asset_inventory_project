@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { CSVLink } from "react-csv";
+<<<<<<< HEAD
 import { useSelector } from 'react-redux';
 import { AiOutlineUser } from 'react-icons/ai';
 
@@ -9,6 +10,10 @@ function ProcManagerDashboard() {
   const user = useSelector((state) => state.auth.user)
   console.log("User:", user);
 
+=======
+
+function ProcManagerDashboard() {
+>>>>>>> origin/victor
   const navigate = useNavigate();
   const [assets, setAssets] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -23,10 +28,13 @@ function ProcManagerDashboard() {
   });
   const [editingAsset, setEditingAsset] = useState(null);
 
+<<<<<<< HEAD
   const [sortCriteria, setSortCriteria] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
+=======
+>>>>>>> origin/victor
   useEffect(() => {
     if (selectedSection === 'viewAssets' || selectedSection === 'manageAssets') {
       fetchAssets();
@@ -34,6 +42,7 @@ function ProcManagerDashboard() {
     if (selectedSection === 'viewRequests') {
       fetchRequests();
     }
+<<<<<<< HEAD
   }, [selectedSection, sortCriteria, categoryFilter, statusFilter]);
 
   const fetchAssets = async () => {
@@ -66,6 +75,14 @@ function ProcManagerDashboard() {
       }
 
       setAssets(filteredAssets);
+=======
+  }, [selectedSection]);
+
+  const fetchAssets = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/Assets');
+      setAssets(response.data);
+>>>>>>> origin/victor
     } catch (error) {
       console.error("Error fetching assets:", error);
     }
@@ -100,10 +117,13 @@ function ProcManagerDashboard() {
   return (
     <div style={styles.adminDashboard}>
       <div style={styles.sidebar}>
+<<<<<<< HEAD
       <div style={styles.userInfo}>
         <AiOutlineUser style={styles.userIcon} />
         <strong>{user.username}</strong>
       </div> 
+=======
+>>>>>>> origin/victor
         <h2 style={styles.sidebarTitle}>Procurement Manager Dashboard</h2>
         <ul style={styles.navList}>
           <li style={styles.navItem} onClick={() => handleSectionChange('viewAssets')}>View All Assets</li>
@@ -122,6 +142,7 @@ function ProcManagerDashboard() {
         {selectedSection === 'viewAssets' && (
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>All Assets</h2>
+<<<<<<< HEAD
 
             <div style={styles.filterContainer}>
               <select
@@ -156,6 +177,8 @@ function ProcManagerDashboard() {
               </select>
             </div>
 
+=======
+>>>>>>> origin/victor
             <div style={styles.assetGrid}>
               {assets.length > 0 ? (
                 assets.map(asset => (
@@ -258,6 +281,7 @@ function ProcManagerDashboard() {
                 }
                 style={styles.input}
               />
+<<<<<<< HEAD
               <select
                 value={editingAsset ? editingAsset.status : newAsset.status}
                 onChange={(e) =>
@@ -273,6 +297,21 @@ function ProcManagerDashboard() {
 
               <button type="submit" style={styles.submitButton}>
                 {editingAsset ? 'Update Asset' : 'Add Asset'}
+=======
+              <input
+                type="text"
+                placeholder="Department ID"
+                value={editingAsset ? editingAsset.department_id : newAsset.department_id}
+                onChange={(e) =>
+                  editingAsset
+                    ? setEditingAsset({ ...editingAsset, department_id: e.target.value })
+                    : setNewAsset({ ...newAsset, department_id: e.target.value })
+                }
+                style={styles.input}
+              />
+              <button type="submit" style={styles.submitButton}>
+                {editingAsset ? "Update Asset" : "Add Asset"}
+>>>>>>> origin/victor
               </button>
             </form>
           </div>
@@ -286,22 +325,39 @@ const styles = {
   adminDashboard: {
     display: 'flex',
     minHeight: '100vh',
+<<<<<<< HEAD
   },
   sidebar: {
     width: '250px',
     backgroundColor: '#333',
+=======
+    fontFamily: 'Arial, sans-serif',
+    backgroundColor: '#f4f6f8',
+  },
+  sidebar: {
+    width: '250px',
+    backgroundColor: '#2c3e50',
+>>>>>>> origin/victor
     color: 'white',
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
   },
   sidebarTitle: {
+<<<<<<< HEAD
     fontSize: '24px',
     marginBottom: '20px',
+=======
+    fontSize: '22px',
+    fontWeight: 'bold',
+    marginBottom: '20px',
+    color: '#ecf0f1',
+>>>>>>> origin/victor
   },
   navList: {
     listStyleType: 'none',
     padding: 0,
+<<<<<<< HEAD
   },
   navItem: {
     marginBottom: '10px',
@@ -366,11 +422,72 @@ const styles = {
   assetImage: {
     width: '100%',
     height: 'auto',
+=======
+    marginBottom: '20px',
+  },
+  navItem: {
+    padding: '10px 0',
+    cursor: 'pointer',
+    color: '#bdc3c7',
+    transition: 'color 0.2s',
+  },
+  downloadLink: {
+    color: '#3498db',
+    textDecoration: 'none',
+  },
+  logoutButton: {
+    padding: '10px 20px',
+    backgroundColor: '#e74c3c',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    alignSelf: 'center',
+    marginTop: '20px',
+  },
+  content: {
+    flexGrow: 1,
+    padding: '20px',
+  },
+  contentTitle: {
+    color: '#34495e',
+    fontSize: '24px',
+    fontWeight: '600',
+    marginBottom: '20px',
+  },
+  section: {
+    backgroundColor: '#ecf0f1',
+    padding: '20px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    marginBottom: '20px',
+  },
+  assetGrid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '10px',
+  },
+  assetCard: {
+    width: '200px',
+    backgroundColor: '#fff',
+    padding: '10px',
+    borderRadius: '8px',
+    textAlign: 'center',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  },
+  assetImage: {
+    width: '100%',
+    height: '120px',
+    objectFit: 'cover',
+    borderRadius: '5px',
+>>>>>>> origin/victor
     marginBottom: '10px',
   },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
+<<<<<<< HEAD
   },
   tableHeader: {
     backgroundColor: '#f4f4f4',
@@ -383,6 +500,30 @@ const styles = {
   },
   approveButton: {
     padding: '5px 10px',
+=======
+    marginTop: '10px',
+    borderRadius: '8px',
+    overflow: 'hidden',
+  },
+  tableHeader: {
+    backgroundColor: '#34495e',
+    color: 'white',
+    padding: '10px',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: '14px',
+  },
+  tableCell: {
+    padding: '10px',
+    textAlign: 'center',
+    backgroundColor: '#ffffff',
+    borderBottom: '1px solid #ddd',
+    fontSize: '14px',
+  },
+  approveButton: {
+    padding: '5px 10px',
+    marginRight: '5px',
+>>>>>>> origin/victor
     backgroundColor: '#28a745',
     color: 'white',
     border: 'none',
@@ -397,6 +538,7 @@ const styles = {
     borderRadius: '4px',
     cursor: 'pointer',
   },
+<<<<<<< HEAD
   form: {
     display: 'flex',
     flexDirection: 'column',
@@ -411,6 +553,11 @@ const styles = {
   submitButton: {
     padding: '10px',
     backgroundColor: '#007bff',
+=======
+  submitButton: {
+    padding: '10px',
+    backgroundColor: '#3498db',
+>>>>>>> origin/victor
     color: 'white',
     border: 'none',
     borderRadius: '4px',
@@ -423,6 +570,7 @@ const styles = {
     borderRadius: '4px',
     border: '1px solid #ccc',
   },
+<<<<<<< HEAD
   userInfo: {
     position: 'absolute',
     top: '30px', // 20px from top of the page
@@ -440,6 +588,8 @@ const styles = {
   userIcon: {
     fontSize: '30px', // Increase icon size
   }
+=======
+>>>>>>> origin/victor
 };
 
 export default ProcManagerDashboard;
