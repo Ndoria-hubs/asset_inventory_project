@@ -10,9 +10,10 @@ import AboutPage from "./pages/AboutPage";
 import Profile from "./pages/UserProfile";
 import { checkAuth } from "./services/api";
 import Logout from "./pages/Logout";
+import Features from "./pages/FeaturesPage";
 
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+//import "slick-carousel/slick/slick.css";
+//import "slick-carousel/slick/slick-theme.css";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -49,6 +50,10 @@ function App() {
             )
           }
         />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/contacts" element={<ContactsPage />} />
+
         <Route
           path="/login"
           element={user ? <Navigate to="/admin-dashboard" /> : <Login />}
