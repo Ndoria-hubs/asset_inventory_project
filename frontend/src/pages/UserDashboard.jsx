@@ -294,7 +294,7 @@ const styles = {
     cursor: 'pointer',
     padding: '10px 0',
     fontSize: '18px',
-    color: '#bdc3c7',
+    color: '#bdc3c7',   
     transition: 'color 0.2s',
   },
   logoutButton: {

@@ -89,18 +89,6 @@
       "updated_at": "2024-11-01T10:00:00"
     },
     {
-      "id": "2",
-      "asset_name": "Office Chair",
-      "description": "Ergonomic office chair",
-      "category_id": 2,
-      "image_url": "src/assets/chair.jpg",
-      "status": "Allocated",
-      "allocated_to": 3,
-      "department_id": 2,
-      "created_at": "2024-11-01T10:30:00",
-      "updated_at": "2024-11-01T10:30:00"
-    },
-    {
       "id": "3",
       "asset_name": "Desktop Monitor",
       "description": "24-inch LED Monitor",
@@ -219,15 +207,6 @@
       "department_id": 3,
       "created_at": "2024-11-02T12:00:00",
       "updated_at": "2024-11-02T12:00:00"
-    },
-    {
-      "id": "4a8e",
-      "asset_name": "",
-      "description": "",
-      "category_id": "",
-      "condition": "",
-      "status": "Available",
-      "department_id": ""
     }
   ],
   "Categories": [

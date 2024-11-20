@@ -182,6 +182,20 @@ function AdminDashboard() {
                     <h4>{asset.asset_name}</h4>
                     <p>{asset.description}</p>
                     <span>Status: {asset.status}</span>
+                    <div style={styles.buttonContainer}>
+                      <button
+                        onClick={() => handleEditAsset(asset)}
+                        style={styles.editButton}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAsset(asset.id)}
+                        style={styles.deleteButton}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))
               ) : (
@@ -227,6 +241,134 @@ function AdminDashboard() {
             </table>
           </div>
         )}
+
+        {selectedSection === 'manageAssets' && (
+          <div style={styles.section}>
+            <h2 style={styles.sectionTitle}>Manage Assets</h2>
+
+            {/* Asset Form */}
+            <form
+              onSubmit={editingAsset ? handleUpdateAsset : handleAddAsset}
+              style={styles.formContainer}
+            >
+              <h3>{editingAsset ? "Edit Asset" : "Add New Asset"}</h3>
+              <label style={styles.label}>
+                Asset Name:
+                <input
+                  type="text"
+                  value={editingAsset ? editingAsset.asset_name : newAsset.asset_name}
+                  onChange={(e) =>
+                    editingAsset
+                      ? setEditingAsset({ ...editingAsset, asset_name: e.target.value })
+                      : setNewAsset({ ...newAsset, asset_name: e.target.value })
+                  }
+                  required
+                  style={styles.input}
+                />
+              </label>
+              <label style={styles.label}>
+                Description:
+                <textarea
+                  value={editingAsset ? editingAsset.description : newAsset.description}
+                  onChange={(e) =>
+                    editingAsset
+                      ? setEditingAsset({ ...editingAsset, description: e.target.value })
+                      : setNewAsset({ ...newAsset, description: e.target.value })
+                  }
+                  required
+                  style={styles.input}
+                />
+              </label>
+              <label style={styles.label}>
+                Category:
+                <select
+                  value={editingAsset ? editingAsset.category_id : newAsset.category_id}
+                  onChange={(e) =>
+                    editingAsset
+                      ? setEditingAsset({ ...editingAsset, category_id: e.target.value })
+                      : setNewAsset({ ...newAsset, category_id: e.target.value })
+                  }
+                  required
+                  style={styles.select}
+                >
+                  <option value="">Select a category</option>
+                  <option value="1">Electronics</option>
+                  <option value="2">Furniture</option>
+                </select>
+              </label>
+              <label style={styles.label}>
+                Condition:
+                <select
+                  value={editingAsset ? editingAsset.condition : newAsset.condition}
+                  onChange={(e) =>
+                    editingAsset
+                      ? setEditingAsset({ ...editingAsset, condition: e.target.value })
+                      : setNewAsset({ ...newAsset, condition: e.target.value })
+                  }
+                  required
+                  style={styles.select}
+                >
+                  <option value="">Select a condition</option>
+                  <option value="New">New</option>
+                  <option value="Used">Used</option>
+                  <option value="Damaged">Damaged</option>
+                </select>
+              </label>
+              <label style={styles.label}>
+                Department:
+                <input
+                  type="text"
+                  value={editingAsset ? editingAsset.department_id : newAsset.department_id}
+                  onChange={(e) =>
+                    editingAsset
+                      ? setEditingAsset({ ...editingAsset, department_id: e.target.value })
+                      : setNewAsset({ ...newAsset, department_id: e.target.value })
+                  }
+                  required
+                  style={styles.input}
+                />
+              </label>
+              <button type="submit" style={styles.submitButton}>
+                {editingAsset ? "Update Asset" : "Add Asset"}
+              </button>
+              {editingAsset && (
+                <button
+                  type="button"
+                  onClick={() => setEditingAsset(null)}
+                  style={styles.cancelButton}
+                >
+                  Cancel
+                </button>
+              )}
+            </form>
+
+            {/* Asset List */}
+            <div style={styles.assetGrid}>
+              {assets.map((asset) => (
+                <div key={asset.id} style={styles.assetCard}>
+                  <img src={asset.image_url} alt={asset.asset_name} style={styles.assetImage} />
+                  <h4>{asset.asset_name}</h4>
+                  <p>{asset.description}</p>
+                  <span>Status: {asset.status}</span>
+                  <div style={styles.buttonContainer}>
+                    <button
+                      onClick={() => handleEditAsset(asset)}
+                      style={styles.editButton}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteAsset(asset.id)}
+                      style={styles.deleteButton}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -236,51 +378,46 @@ const styles = {
   adminDashboard: {
     display: 'flex',
     minHeight: '100vh',
-    fontFamily: 'Arial, sans-serif',
-    backgroundColor: '#f4f6f8',
   },
   sidebar: {
     width: '250px',
-    backgroundColor: '#2c3e50',
+    backgroundColor: '#343a40',
     color: 'white',
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
+    justifyContent: 'space-between',
   },
   sidebarTitle: {
-    fontSize: '22px',
+    fontSize: '20px',
     fontWeight: 'bold',
     marginBottom: '20px',
-    color: '#ecf0f1',
   },
   navList: {
     listStyleType: 'none',
     padding: 0,
-    marginBottom: 'auto',
   },
   navItem: {
-    fontSize: '18px',
-    cursor: 'pointer',
     padding: '10px 0',
-    borderBottom: '1px solid #ecf0f1',
-    transition: 'background-color 0.3s',
+    cursor: 'pointer',
+    borderBottom: '1px solid #495057',
+    color: '#ccc',
+    textAlign: 'left',
   },
   logoutButton: {
-    backgroundColor: '#e74c3c',
-    border: 'none',
     padding: '10px',
-    fontSize: '16px',
+    backgroundColor: '#dc3545',
     color: 'white',
+    border: 'none',
+    borderRadius: '5px',
     cursor: 'pointer',
-    marginTop: '20px',
   },
   content: {
     flex: 1,
     padding: '20px',
-    backgroundColor: 'white',
   },
   contentTitle: {
-    fontSize: '30px',
+    fontSize: '24px',
     fontWeight: 'bold',
     marginBottom: '20px',
   },
@@ -288,69 +425,89 @@ const styles = {
     marginBottom: '20px',
   },
   sectionTitle: {
-    fontSize: '24px',
-    fontWeight: 'bold',
+    fontSize: '20px',
     marginBottom: '15px',
   },
   filterContainer: {
     display: 'flex',
     gap: '15px',
-    marginBottom: '20px',
+    marginBottom: '15px',
   },
   select: {
     padding: '10px',
-    fontSize: '16px',
-    border: '1px solid #ccc',
     borderRadius: '5px',
-    width: '200px',
+    border: '1px solid #ccc',
   },
   assetGrid: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '20px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+    gap: '15px',
   },
   assetCard: {
-    backgroundColor: '#fff',
-    padding: '15px',
-    border: '1px solid #ddd',
+    border: '1px solid #ccc',
     borderRadius: '8px',
-    width: '200px',
+    padding: '10px',
     textAlign: 'center',
     boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
   },
   assetImage: {
-    maxWidth: '100%',
-    borderRadius: '8px',
+    width: '100%',
+    height: '150px',
+    objectFit: 'cover',
     marginBottom: '10px',
   },
-  table: {
+  formContainer: {
+    backgroundColor: '#f8f9fa',
+    padding: '20px',
+    marginBottom: '20px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+  },
+  input: {
     width: '100%',
-    borderCollapse: 'collapse',
-  },
-  tableHeader: {
-    textAlign: 'left',
     padding: '10px',
-    backgroundColor: '#34495e',
+    marginBottom: '15px',
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+  },
+  submitButton: {
+    backgroundColor: '#28a745',
     color: 'white',
-  },
-  tableCell: {
-    padding: '10px',
-    borderBottom: '1px solid #ddd',
-  },
-  approveButton: {
-    backgroundColor: '#2ecc71',
     border: 'none',
-    color: 'white',
-    padding: '8px 12px',
+    padding: '10px 20px',
+    borderRadius: '5px',
+    cursor: 'pointer',
     marginRight: '10px',
+  },
+  cancelButton: {
+    backgroundColor: '#dc3545',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '5px',
     cursor: 'pointer',
   },
-  rejectButton: {
-    backgroundColor: '#e74c3c',
+  editButton: {
+    backgroundColor: '#ffc107',
+    color: 'black',
     border: 'none',
-    color: 'white',
     padding: '8px 12px',
+    borderRadius: '5px',
     cursor: 'pointer',
+    marginRight: '10px',
+  },
+  deleteButton: {
+    backgroundColor: '#e74c3c',
+    color: 'white',
+    border: 'none',
+    padding: '8px 12px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  },
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginTop: '10px',
   },
 };
 
