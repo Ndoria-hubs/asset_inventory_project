@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { AiOutlineUser } from "react-icons/ai";
+import { useSelector } from 'react-redux';
 
 function UserDashboard() {
+  const user = useSelector((state) => state.auth.user)
+  // console.log("User:", user);
+  
   const [assetType, setAssetType] = useState('');
   const [requestType, setRequestType] = useState('');
   const [requestedBy, setRequestedBy] = useState('');
@@ -16,6 +21,8 @@ function UserDashboard() {
   const [activeSection, setActiveSection] = useState('viewRequests');
   const [assetNameFilter, setAssetNameFilter] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'asset_name', direction: 'asc' });
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -96,10 +103,26 @@ function UserDashboard() {
     return 0;
   });
 
+  const handleImageFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div style={styles.container}>
+       <div style={styles.userInfo}>
+        <AiOutlineUser style={styles.userIcon} />
+        <strong>{user.username}</strong>
+      </div> 
       <div style={styles.sidebar}>
         <h2 style={styles.sidebarTitle}>User Dashboard</h2>
+
         <ul style={styles.navList}>
           <li style={styles.navItem} onClick={() => setActiveSection('viewRequests')}>
             View My Requests
@@ -107,9 +130,16 @@ function UserDashboard() {
           <li style={styles.navItem} onClick={() => setActiveSection('viewAssets')}>
             View All Assets
           </li>
+          <li style={styles.navItem} onClick={() => setActiveSection('viewMyAssets')}>
+            View My Assets
+          </li>
           <li style={styles.navItem} onClick={() => setActiveSection('makeRequest')}>
             Make a New Request
           </li>
+          <li style={styles.navItem} onClick={() => setActiveSection('viewProfile')}>
+            View Profile
+          </li>
+
           <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
         </ul>
       </div>
@@ -145,6 +175,42 @@ function UserDashboard() {
               </tbody>
             </table>
           </div>
+        ) : activeSection === 'viewProfile' ? (
+          <div style={styles.profileContainer}>
+            <div style={styles.profileHeader}>
+              <div style={styles.imagePlaceholder}>
+                <label style={styles.imageText}>
+              {profileImage ? (
+                <img src={profileImage} alt="Profile" style={styles.profileImage} />
+              ) : (
+                <span>Add Photo</span>
+              )}
+              <input type="file" accept="image/*" onChange={handleImageFileChange} style={styles.fileInput} />
+              </label>
+            </div>
+            </div>
+
+            <div style={styles.profileInfoContainer}>
+              <p><strong>Username:</strong> {user.username}</p>
+              <p><strong>Email:</strong> {user.email}</p>
+              <p><strong>Department ID:</strong> {user.department_id}</p>
+              <p><strong>Role:</strong> {user.role}</p>
+              <p><strong>Account Created:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
+              <p><strong>Last Updated:</strong> {new Date(user.updated_at).toLocaleDateString()}</p>
+
+              <div style={styles.passwordSection}>
+                <strong>Password: </strong>
+                <span>
+                  {isPasswordVisible ? user.password : '••••••••••'}
+                </span>
+                <button 
+                  onClick={() => setIsPasswordVisible(!isPasswordVisible)} 
+                  style={styles.passwordToggleButton}
+                >
+                  {isPasswordVisible ? 'Hide' : 'Show'}
+                </button>
+              </div>
+            </div>
         ) : activeSection === 'viewAssets' ? (
           <div style={styles.assetContainer}>
             <h2>All Assets</h2>
@@ -310,6 +376,7 @@ const styles = {
     flexGrow: 1,
     padding: '20px',
   },
+  
   assetContainer: {
     backgroundColor: '#2C3E50',
     padding: '20px',
@@ -393,6 +460,80 @@ const styles = {
     borderRadius: '5px',
     cursor: 'pointer',
   },
-};
+  userInfo: {
+    position: 'absolute',
+    top: '40px', // 20px from top of the page
+    right: '20px', // 20px from the right of the page
+    backgroundColor: '#A9DFBF', // Light green background
+    color: '#2C3E50', // Blue color for the text
+    fontWeight: 'bold',
+    padding: '10px',
+    borderRadius: '5px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    zIndex: 10, // Ensure it stays on top of other content
+  },
+  userIcon: {
+    fontSize: '30px', // Increase icon size
+  },
+  profileContainer: {
+    backgroundColor: '#34495e',
+    padding: '60px',
+    borderRadius: '7px',
+    color: '#ECF0F1',
+  },
+  profileHeader: {
+    textAlign: 'center',
+    marginBottom: '20px',
+  },
+  imagePlaceholder: {
+    width: '200px',
+    height: '200px',
+    borderRadius: '50%',
+    backgroundColor: '#95a5a6',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#ecf0f1',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    position: 'relative',
+    overflow: 'hidden', // Ensure the image fits inside the circle
+  },
+  imageText: {
+    color: '#fff',
+    cursor: 'pointer',
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover', // Ensures the image fits the circular area
+  },
+  fileInput: {
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    opacity: '0',
+    cursor: 'pointer',
+  },
+  profileInfoContainer: {
+    marginTop: '50px',
+    marginBottom: '50px',
+  },
+  passwordSection: {
+    marginTop: '50px',
+    marginBottom: '50px',
+  },
+  passwordToggleButton: {
+    padding: '5px 10px',
+    backgroundColor: '#2ecc71',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  }};
 
 export default UserDashboard;

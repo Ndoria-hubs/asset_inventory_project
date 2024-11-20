@@ -1,15 +1,17 @@
 // src/pages/Login.js
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { setUser } from '../features/auth/authSlice';
 import api from '../services/api';
 import styles from './Login.module.css';
+import toast, { Toaster } from 'react-hot-toast';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,19 +22,20 @@ function Login() {
       );
 
       if (user) {
+        // console.log("User found:", user);
         dispatch(setUser({ user, token: 'mockToken' }));
 
         if (user.role === 'Admin') {
-          window.location.href = '/admin-dashboard';
+          navigate('/admin-dashboard');
         } else if (user.role === 'Procurement Manager') {
-          window.location.href = '/manager-dashboard';
+          navigate('/manager-dashboard');
         } else {
-          window.location.href = '/user-dashboard';
+          navigate('/user-dashboard');
         }
 
-        alert("Login successful");
+        toast.success("Login successful");
       } else {
-        alert("Invalid username or password");
+        toast.error("Invalid username or password");
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -42,6 +45,7 @@ function Login() {
 
   return (
     <div className={styles['login-container']}>
+      <Toaster />
       <div className={styles.wrapper}>
         <div className={`${styles['form-wrapper']} ${styles['sign-in']}`}>
           <form onSubmit={handleSubmit}>

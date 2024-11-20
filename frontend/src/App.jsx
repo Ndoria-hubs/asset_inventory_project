@@ -5,13 +5,13 @@ import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp'; // Import SignUp component
 import AdminDashboard from './pages/AdminDashboard';
-import UserDashboard from './pages/UserDashboard';
+// import UserDashboard from './pages/UserDashboard';
 import ManagerDashboard from './pages/ManagerDashboard';
 import AboutPage from './pages/AboutPage'; // Import AboutPage
-// import ContactsPage from './pages/ContactsPage'; // Import ContactsPage
-
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import UserDashboard from './pages/UserDashboard';
+
 
 function App() {
   return (

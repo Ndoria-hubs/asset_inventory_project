@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { AiOutlineUser } from 'react-icons/ai';
 
 function AdminDashboard() {
+  const user = useSelector((state) => state.auth.user)
+  console.log("User:", user);
+
   const navigate = useNavigate();
   const [assets, setAssets] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [users, setUsers] = useState([]);
   const [selectedSection, setSelectedSection] = useState('viewAssets');
   const [newAsset, setNewAsset] = useState({
     asset_name: '',
@@ -16,9 +22,8 @@ function AdminDashboard() {
     department_id: '',
   });
   const [editingAsset, setEditingAsset] = useState(null);
-  const [sortKey, setSortKey] = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
-  const [filterCondition, setFilterCondition] = useState('');
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: '' });
+  const [editingUser, setEditingUser] = useState(null);
 
   useEffect(() => {
     if (selectedSection === 'viewAssets' || selectedSection === 'manageAssets') {
@@ -27,6 +32,9 @@ function AdminDashboard() {
     if (selectedSection === 'viewRequests') {
       fetchRequests();
     }
+    if (selectedSection === 'manageUsers') {
+      fetchUsers();
+    }
   }, [selectedSection]);
 
   const fetchAssets = async () => {
@@ -34,7 +42,7 @@ function AdminDashboard() {
       const response = await axios.get('http://localhost:3000/Assets');
       setAssets(response.data);
     } catch (error) {
-      console.error("Error fetching assets:", error);
+      console.error('Error fetching assets:', error);
     }
   };
 
@@ -43,7 +51,16 @@ function AdminDashboard() {
       const response = await axios.get('http://localhost:3000/Requests');
       setRequests(response.data);
     } catch (error) {
-      console.error("Error fetching requests:", error);
+      console.error('Error fetching requests:', error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/Users');
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -62,7 +79,7 @@ function AdminDashboard() {
       fetchAssets();
       setNewAsset({ asset_name: '', description: '', category_id: '', condition: '', status: 'Available', department_id: '' });
     } catch (error) {
-      console.error("Error adding asset:", error);
+      console.error('Error adding asset:', error);
     }
   };
 
@@ -77,7 +94,7 @@ function AdminDashboard() {
       fetchAssets();
       setEditingAsset(null);
     } catch (error) {
-      console.error("Error updating asset:", error);
+      console.error('Error updating asset:', error);
     }
   };
 
@@ -86,61 +103,80 @@ function AdminDashboard() {
       await axios.delete(`http://localhost:3000/Assets/${id}`);
       fetchAssets();
     } catch (error) {
-      console.error("Error deleting asset:", error);
+      console.error('Error deleting asset:', error);
+    }
+  };
+
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:3000/Users', newUser);
+      fetchUsers();
+      setNewUser({ name: '', email: '', password: '', role: '' });
+    } catch (error) {
+      console.error('Error adding user:', error);
+    }
+  };
+
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(`http://localhost:3000/Users/${editingUser.id}`, editingUser);
+      fetchUsers();
+      setEditingUser(null);
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
+
+  const handleDeleteUser = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/Users/${id}`);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
     }
   };
 
   const handleApprove = async (id) => {
     try {
-      await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 2 }); // 2 for Approved
+      await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 2 });
       fetchRequests();
     } catch (error) {
-      console.error("Error approving request:", error);
+      console.error('Error approving request:', error);
     }
   };
 
   const handleReject = async (id) => {
     try {
-      await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 3 }); // 3 for Rejected
+      await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 3 });
       fetchRequests();
     } catch (error) {
-      console.error("Error rejecting request:", error);
+      console.error('Error rejecting request:', error);
     }
   };
 
-  const handleSort = (e) => {
-    setSortKey(e.target.value);
+  const closeModal = () => {
+    setEditingAsset(null);
   };
-
-  const handleFilterCategory = (e) => {
-    setFilterCategory(e.target.value);
-  };
-
-  const handleFilterCondition = (e) => {
-    setFilterCondition(e.target.value);
-  };
-
-  const filteredAssets = assets.filter(asset => {
-    const categoryMatch = filterCategory ? asset.category_id === filterCategory : true;
-    const conditionMatch = filterCondition ? asset.condition === filterCondition : true;
-    return categoryMatch && conditionMatch;
-  });
-
-  const sortedAssets = filteredAssets.sort((a, b) => {
-    if (sortKey) {
-      return a[sortKey] < b[sortKey] ? -1 : 1;
-    }
-    return 0;
-  });
 
   return (
     <div style={styles.adminDashboard}>
       <div style={styles.sidebar}>
+      <div style={styles.userInfo}>
+        <AiOutlineUser style={styles.userIcon} />
+        <strong>{user.username}</strong>
+      </div> 
         <h2 style={styles.sidebarTitle}>Admin Dashboard</h2>
         <ul style={styles.navList}>
           <li style={styles.navItem} onClick={() => handleSectionChange('viewAssets')}>View All Assets</li>
           <li style={styles.navItem} onClick={() => handleSectionChange('viewRequests')}>View Requests</li>
           <li style={styles.navItem} onClick={() => handleSectionChange('manageAssets')}>Manage Assets</li>
+          <li style={styles.navItem} onClick={() => handleSectionChange('manageUsers')}>Manage Users</li>
         </ul>
         <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
       </div>
@@ -148,53 +184,21 @@ function AdminDashboard() {
       <div style={styles.content}>
         <h1 style={styles.contentTitle}>Admin Dashboard</h1>
 
+        {/* View Assets Section */}
         {selectedSection === 'viewAssets' && (
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>All Assets</h2>
-
-            <div style={styles.filterContainer}>
-              <select onChange={handleSort} value={sortKey} style={styles.select}>
-                <option value="">Sort by</option>
-                <option value="asset_name">Name</option>
-                <option value="condition">Condition</option>
-                <option value="status">Status</option>
-              </select>
-
-              <select onChange={handleFilterCategory} value={filterCategory} style={styles.select}>
-                <option value="">Filter by Category</option>
-                <option value="1">Electronics</option>
-                <option value="2">Furniture</option>
-              </select>
-
-              <select onChange={handleFilterCondition} value={filterCondition} style={styles.select}>
-                <option value="">Filter by Condition</option>
-                <option value="New">New</option>
-                <option value="Used">Used</option>
-                <option value="Damaged">Damaged</option>
-              </select>
-            </div>
-
             <div style={styles.assetGrid}>
-              {sortedAssets.length > 0 ? (
-                sortedAssets.map(asset => (
+              {assets.length > 0 ? (
+                assets.map((asset) => (
                   <div key={asset.id} style={styles.assetCard}>
                     <img src={asset.image_url} alt={asset.asset_name} style={styles.assetImage} />
                     <h4>{asset.asset_name}</h4>
                     <p>{asset.description}</p>
                     <span>Status: {asset.status}</span>
                     <div style={styles.buttonContainer}>
-                      <button
-                        onClick={() => handleEditAsset(asset)}
-                        style={styles.editButton}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAsset(asset.id)}
-                        style={styles.deleteButton}
-                      >
-                        Delete
-                      </button>
+                      <button onClick={() => handleEditAsset(asset)} style={styles.editButton}>Edit</button>
+                      <button onClick={() => handleDeleteAsset(asset.id)} style={styles.deleteButton}>Delete</button>
                     </div>
                   </div>
                 ))
@@ -205,6 +209,67 @@ function AdminDashboard() {
           </div>
         )}
 
+        {/* Edit Asset Modal */}
+        {editingAsset && (
+          <div style={styles.modal}>
+            <div style={styles.modalHeader}>
+              <h2 style={styles.modalTitle}>Edit Asset</h2>
+              <button onClick={closeModal} style={styles.closeButton}>X</button>
+            </div>
+            <form onSubmit={handleUpdateAsset} style={styles.form}>
+              <input
+                type="text"
+                placeholder="Asset Name"
+                value={editingAsset.asset_name}
+                onChange={(e) =>
+                  setEditingAsset({ ...editingAsset, asset_name: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Description"
+                value={editingAsset.description}
+                onChange={(e) =>
+                  setEditingAsset({ ...editingAsset, description: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Category ID"
+                value={editingAsset.category_id}
+                onChange={(e) =>
+                  setEditingAsset({ ...editingAsset, category_id: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Condition"
+                value={editingAsset.condition}
+                onChange={(e) =>
+                  setEditingAsset({ ...editingAsset, condition: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Department ID"
+                value={editingAsset.department_id}
+                onChange={(e) =>
+                  setEditingAsset({ ...editingAsset, department_id: e.target.value })
+                }
+                style={styles.input}
+              />
+              <button type="submit" style={styles.submitButton}>
+                Update Asset
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* View Requests Section */}
         {selectedSection === 'viewRequests' && (
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>User Requests</h2>
@@ -226,7 +291,9 @@ function AdminDashboard() {
                     <td style={styles.tableCell}>{request.quantity}</td>
                     <td style={styles.tableCell}>{request.urgency}</td>
                     <td style={styles.tableCell}>{request.reason}</td>
-                    <td style={styles.tableCell}>{request.status_id === 1 ? "Pending" : request.status_id === 2 ? "Approved" : "Rejected"}</td>
+                    <td style={styles.tableCell}>
+                      {request.status_id === 1 ? 'Pending' : request.status_id === 2 ? 'Approved' : 'Rejected'}
+                    </td>
                     <td style={styles.tableCell}>
                       {request.status_id === 1 && (
                         <>
@@ -242,131 +309,176 @@ function AdminDashboard() {
           </div>
         )}
 
+        {/* Manage Assets Section */}
         {selectedSection === 'manageAssets' && (
           <div style={styles.section}>
-            <h2 style={styles.sectionTitle}>Manage Assets</h2>
-
-            {/* Asset Form */}
-            <form
-              onSubmit={editingAsset ? handleUpdateAsset : handleAddAsset}
-              style={styles.formContainer}
-            >
-              <h3>{editingAsset ? "Edit Asset" : "Add New Asset"}</h3>
-              <label style={styles.label}>
-                Asset Name:
-                <input
-                  type="text"
-                  value={editingAsset ? editingAsset.asset_name : newAsset.asset_name}
-                  onChange={(e) =>
-                    editingAsset
-                      ? setEditingAsset({ ...editingAsset, asset_name: e.target.value })
-                      : setNewAsset({ ...newAsset, asset_name: e.target.value })
-                  }
-                  required
-                  style={styles.input}
-                />
-              </label>
-              <label style={styles.label}>
-                Description:
-                <textarea
-                  value={editingAsset ? editingAsset.description : newAsset.description}
-                  onChange={(e) =>
-                    editingAsset
-                      ? setEditingAsset({ ...editingAsset, description: e.target.value })
-                      : setNewAsset({ ...newAsset, description: e.target.value })
-                  }
-                  required
-                  style={styles.input}
-                />
-              </label>
-              <label style={styles.label}>
-                Category:
-                <select
-                  value={editingAsset ? editingAsset.category_id : newAsset.category_id}
-                  onChange={(e) =>
-                    editingAsset
-                      ? setEditingAsset({ ...editingAsset, category_id: e.target.value })
-                      : setNewAsset({ ...newAsset, category_id: e.target.value })
-                  }
-                  required
-                  style={styles.select}
-                >
-                  <option value="">Select a category</option>
-                  <option value="1">Electronics</option>
-                  <option value="2">Furniture</option>
-                </select>
-              </label>
-              <label style={styles.label}>
-                Condition:
-                <select
-                  value={editingAsset ? editingAsset.condition : newAsset.condition}
-                  onChange={(e) =>
-                    editingAsset
-                      ? setEditingAsset({ ...editingAsset, condition: e.target.value })
-                      : setNewAsset({ ...newAsset, condition: e.target.value })
-                  }
-                  required
-                  style={styles.select}
-                >
-                  <option value="">Select a condition</option>
-                  <option value="New">New</option>
-                  <option value="Used">Used</option>
-                  <option value="Damaged">Damaged</option>
-                </select>
-              </label>
-              <label style={styles.label}>
-                Department:
-                <input
-                  type="text"
-                  value={editingAsset ? editingAsset.department_id : newAsset.department_id}
-                  onChange={(e) =>
-                    editingAsset
-                      ? setEditingAsset({ ...editingAsset, department_id: e.target.value })
-                      : setNewAsset({ ...newAsset, department_id: e.target.value })
-                  }
-                  required
-                  style={styles.input}
-                />
-              </label>
+            <h2 style={styles.sectionTitle}>{editingAsset ? 'Edit Asset' : 'Add New Asset'}</h2>
+            <form onSubmit={editingAsset ? handleUpdateAsset : handleAddAsset} style={styles.form}>
+              <input
+                type="text"
+                placeholder="Asset Name"
+                value={editingAsset ? editingAsset.asset_name : newAsset.asset_name}
+                onChange={(e) =>
+                  editingAsset
+                    ? setEditingAsset({ ...editingAsset, asset_name: e.target.value })
+                    : setNewAsset({ ...newAsset, asset_name: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Description"
+                value={editingAsset ? editingAsset.description : newAsset.description}
+                onChange={(e) =>
+                  editingAsset
+                    ? setEditingAsset({ ...editingAsset, description: e.target.value })
+                    : setNewAsset({ ...newAsset, description: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Category ID"
+                value={editingAsset ? editingAsset.category_id : newAsset.category_id}
+                onChange={(e) =>
+                  editingAsset
+                    ? setEditingAsset({ ...editingAsset, category_id: e.target.value })
+                    : setNewAsset({ ...newAsset, category_id: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Condition"
+                value={editingAsset ? editingAsset.condition : newAsset.condition}
+                onChange={(e) =>
+                  editingAsset
+                    ? setEditingAsset({ ...editingAsset, condition: e.target.value })
+                    : setNewAsset({ ...newAsset, condition: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Department ID"
+                value={editingAsset ? editingAsset.department_id : newAsset.department_id}
+                onChange={(e) =>
+                  editingAsset
+                    ? setEditingAsset({ ...editingAsset, department_id: e.target.value })
+                    : setNewAsset({ ...newAsset, department_id: e.target.value })
+                }
+                style={styles.input}
+              />
               <button type="submit" style={styles.submitButton}>
-                {editingAsset ? "Update Asset" : "Add Asset"}
+                {editingAsset ? 'Update Asset' : 'Add Asset'}
               </button>
-              {editingAsset && (
-                <button
-                  type="button"
-                  onClick={() => setEditingAsset(null)}
-                  style={styles.cancelButton}
-                >
-                  Cancel
-                </button>
-              )}
             </form>
 
-            {/* Asset List */}
-            <div style={styles.assetGrid}>
-              {assets.map((asset) => (
-                <div key={asset.id} style={styles.assetCard}>
-                  <img src={asset.image_url} alt={asset.asset_name} style={styles.assetImage} />
-                  <h4>{asset.asset_name}</h4>
-                  <p>{asset.description}</p>
-                  <span>Status: {asset.status}</span>
-                  <div style={styles.buttonContainer}>
-                    <button
-                      onClick={() => handleEditAsset(asset)}
-                      style={styles.editButton}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAsset(asset.id)}
-                      style={styles.deleteButton}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <h2 style={styles.sectionTitle}>All Assets</h2>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.tableHeader}>Name</th>
+                  <th style={styles.tableHeader}>Description</th>
+                  <th style={styles.tableHeader}>Condition</th>
+                  <th style={styles.tableHeader}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assets.map((asset) => (
+                  <tr key={asset.id}>
+                    <td style={styles.tableCell}>{asset.asset_name}</td>
+                    <td style={styles.tableCell}>{asset.description}</td>
+                    <td style={styles.tableCell}>{asset.condition}</td>
+                    <td style={styles.tableCell}>
+                      <button onClick={() => handleEditAsset(asset)} style={styles.approveButton}>Edit</button>
+                      <button onClick={() => handleDeleteAsset(asset.id)} style={styles.rejectButton}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Manage Users Section */}
+        {selectedSection === 'manageUsers' && (
+          <div style={styles.section}>
+            <h2 style={styles.sectionTitle}>{editingUser ? 'Edit User' : 'Add New User'}</h2>
+            <form onSubmit={editingUser ? handleUpdateUser : handleAddUser} style={styles.form}>
+              <input
+                type="text"
+                placeholder="Name"
+                value={editingUser ? editingUser.name : newUser.name}
+                onChange={(e) =>
+                  editingUser
+                    ? setEditingUser({ ...editingUser, name: e.target.value })
+                    : setNewUser({ ...newUser, name: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={editingUser ? editingUser.email : newUser.email}
+                onChange={(e) =>
+                  editingUser
+                    ? setEditingUser({ ...editingUser, email: e.target.value })
+                    : setNewUser({ ...newUser, email: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={editingUser ? editingUser.password : newUser.password}
+                onChange={(e) =>
+                  editingUser
+                    ? setEditingUser({ ...editingUser, password: e.target.value })
+                    : setNewUser({ ...newUser, password: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Role"
+                value={editingUser ? editingUser.role : newUser.role}
+                onChange={(e) =>
+                  editingUser
+                    ? setEditingUser({ ...editingUser, role: e.target.value })
+                    : setNewUser({ ...newUser, role: e.target.value })
+                }
+                style={styles.input}
+              />
+              <button type="submit" style={styles.submitButton}>
+                {editingUser ? 'Update User' : 'Add User'}
+              </button>
+            </form>
+
+            <h2 style={styles.sectionTitle}>All Users</h2>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.tableHeader}>Name</th>
+                  <th style={styles.tableHeader}>Email</th>
+                  <th style={styles.tableHeader}>Role</th>
+                  <th style={styles.tableHeader}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.id}>
+                    <td style={styles.tableCell}>{user.name}</td>
+                    <td style={styles.tableCell}>{user.email}</td>
+                    <td style={styles.tableCell}>{user.role}</td>
+                    <td style={styles.tableCell}>
+                      <button onClick={() => handleEditUser(user)} style={styles.approveButton}>Edit</button>
+                      <button onClick={() => handleDeleteUser(user.id)} style={styles.rejectButton}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -378,137 +490,203 @@ const styles = {
   adminDashboard: {
     display: 'flex',
     minHeight: '100vh',
+    fontFamily: 'Arial, sans-serif',
+    backgroundColor: '#f4f6f8',
   },
   sidebar: {
     width: '250px',
-    backgroundColor: '#343a40',
+    backgroundColor: '#2c3e50',
     color: 'white',
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
   },
   sidebarTitle: {
-    fontSize: '20px',
+    fontSize: '22px',
     fontWeight: 'bold',
     marginBottom: '20px',
+    color: '#ecf0f1',
   },
   navList: {
     listStyleType: 'none',
     padding: 0,
+    marginBottom: '20px',
   },
   navItem: {
     padding: '10px 0',
     cursor: 'pointer',
-    borderBottom: '1px solid #495057',
-    color: '#ccc',
-    textAlign: 'left',
+    color: '#bdc3c7',
+    transition: 'color 0.2s',
   },
   logoutButton: {
-    padding: '10px',
-    backgroundColor: '#dc3545',
-    color: 'white',
+    padding: '10px 20px',
+    backgroundColor: '#e74c3c',
+    color: '#fff',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
+    fontSize: '16px',
+    alignSelf: 'center',
+    marginTop: '20px',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     padding: '20px',
   },
   contentTitle: {
+    color: '#34495e',
     fontSize: '24px',
-    fontWeight: 'bold',
+    fontWeight: '600',
     marginBottom: '20px',
   },
   section: {
+    backgroundColor: '#ecf0f1',
+    padding: '20px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     marginBottom: '20px',
   },
-  sectionTitle: {
-    fontSize: '20px',
-    marginBottom: '15px',
-  },
-  filterContainer: {
-    display: 'flex',
-    gap: '15px',
-    marginBottom: '15px',
-  },
-  select: {
-    padding: '10px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-  },
   assetGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-    gap: '15px',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '10px',
   },
   assetCard: {
-    border: '1px solid #ccc',
-    borderRadius: '8px',
+    width: '200px',
+    backgroundColor: '#fff',
     padding: '10px',
+    borderRadius: '8px',
     textAlign: 'center',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
   },
   assetImage: {
     width: '100%',
-    height: '150px',
+    height: '120px',
     objectFit: 'cover',
+    borderRadius: '5px',
     marginBottom: '10px',
-  },
-  formContainer: {
-    backgroundColor: '#f8f9fa',
-    padding: '20px',
-    marginBottom: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    marginBottom: '15px',
-    border: '1px solid #ccc',
-    borderRadius: '5px',
-  },
-  submitButton: {
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    marginRight: '10px',
-  },
-  cancelButton: {
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  editButton: {
-    backgroundColor: '#ffc107',
-    color: 'black',
-    border: 'none',
-    padding: '8px 12px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    marginRight: '10px',
-  },
-  deleteButton: {
-    backgroundColor: '#e74c3c',
-    color: 'white',
-    border: 'none',
-    padding: '8px 12px',
-    borderRadius: '5px',
-    cursor: 'pointer',
   },
   buttonContainer: {
     display: 'flex',
     justifyContent: 'space-between',
     marginTop: '10px',
   },
+  editButton: {
+    padding: '5px 10px',
+    backgroundColor: '#3498db',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+  },
+  deleteButton: {
+    padding: '5px 10px',
+    backgroundColor: '#e74c3c',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+  },
+  modal: {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: '#fff',
+    padding: '20px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    zIndex: 1000,
+    width: '400px',
+  },
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '20px',
+  },
+  modalTitle: {
+    fontSize: '20px',
+    margin: 0,
+  },
+  closeButton: {
+    backgroundColor: 'transparent',
+    border: 'none',
+    fontSize: '20px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginTop: '10px',
+    borderRadius: '8px',
+    overflow: 'hidden',
+  },
+  tableHeader: {
+    backgroundColor: '#34495e',
+    color: 'white',
+    padding: '10px',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: '14px',
+  },
+  tableCell: {
+    padding: '10px',
+    textAlign: 'center',
+    backgroundColor: '#ffffff',
+    borderBottom: '1px solid #ddd',
+    fontSize: '14px',
+  },
+  approveButton: {
+    padding: '5px 10px',
+    marginRight: '5px',
+    backgroundColor: '#28a745',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+  },
+  rejectButton: {
+    padding: '5px 10px',
+    backgroundColor: '#dc3545',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+  },
+  submitButton: {
+    padding: '10px',
+    backgroundColor: '#3498db',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+  },
+  input: {
+    marginBottom: '10px',
+    padding: '8px',
+    width: '100%',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+  },
+  userInfo: {
+    position: 'absolute',
+    top: '30px', // 20px from top of the page
+    right: '20px', // 20px from the right of the page
+    backgroundColor: '#A9DFBF', // Light green background
+    color: '#2C3E50', // Blue color for the text
+    fontWeight: 'bold',
+    padding: '10px',
+    borderRadius: '5px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    zIndex: 10, // Ensure it stays on top of other content
+  },
+  userIcon: {
+    fontSize: '30px', // Increase icon size
+  }
 };
 
 export default AdminDashboard;
