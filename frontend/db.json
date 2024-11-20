@@ -219,6 +219,15 @@
       "department_id": 3,
       "created_at": "2024-11-02T12:00:00",
       "updated_at": "2024-11-02T12:00:00"
+    },
+    {
+      "id": "6074",
+      "asset_name": "",
+      "description": "",
+      "category_id": "",
+      "condition": "",
+      "status": "Available",
+      "department_id": ""
     }
   ],
   "Categories": [
@@ -264,6 +273,24 @@
       "status_id": 2,
       "created_at": "2024-11-05T11:00:00",
       "updated_at": "2024-11-05T11:00:00"
+    },
+    {
+      "id": 3,
+      "request_type": "Repair",
+      "quantity": "",
+      "urgency": "High",
+      "reason": "Broken",
+      "status": "Pending",
+      "created_at": "2024-11-19T18:46:45.923Z"
+    },
+    {
+      "id": 4,
+      "request_type": "New Asset",
+      "quantity": "1",
+      "urgency": "Low",
+      "reason": "Old one is outdated",
+      "status": "Pending",
+      "created_at": "2024-11-20T07:41:10.262Z"
     }
   ],
   "Request_statuses": [

@@ -2,8 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { CSVLink } from "react-csv";
+import { useSelector } from 'react-redux';
+import { AiOutlineUser } from 'react-icons/ai';
 
 function ProcManagerDashboard() {
+  const user = useSelector((state) => state.auth.user)
+  console.log("User:", user);
+
   const navigate = useNavigate();
   const [assets, setAssets] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -65,6 +70,10 @@ function ProcManagerDashboard() {
   return (
     <div style={styles.adminDashboard}>
       <div style={styles.sidebar}>
+      <div style={styles.userInfo}>
+        <AiOutlineUser style={styles.userIcon} />
+        <strong>{user.username}</strong>
+      </div> 
         <h2 style={styles.sidebarTitle}>Procurement Manager Dashboard</h2>
         <ul style={styles.navList}>
           <li style={styles.navItem} onClick={() => handleSectionChange('viewAssets')}>View All Assets</li>
@@ -345,6 +354,23 @@ const styles = {
     borderRadius: '4px',
     border: '1px solid #ccc',
   },
+  userInfo: {
+    position: 'absolute',
+    top: '30px', // 20px from top of the page
+    right: '20px', // 20px from the right of the page
+    backgroundColor: '#A9DFBF', // Light green background
+    color: '#2C3E50', // Blue color for the text
+    fontWeight: 'bold',
+    padding: '10px',
+    borderRadius: '5px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    zIndex: 10, // Ensure it stays on top of other content
+  },
+  userIcon: {
+    fontSize: '30px', // Increase icon size
+  }
 };
 
 export default ProcManagerDashboard;
