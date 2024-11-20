@@ -19,8 +19,10 @@ function AdminDashboard() {
   const [sortKey, setSortKey] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterCondition, setFilterCondition] = useState('');
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
+    fetchCategories();
     if (selectedSection === 'viewAssets' || selectedSection === 'manageAssets') {
       fetchAssets();
     }
@@ -44,6 +46,15 @@ function AdminDashboard() {
       setRequests(response.data);
     } catch (error) {
       console.error("Error fetching requests:", error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/Categories');
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -292,8 +303,11 @@ function AdminDashboard() {
                   style={styles.select}
                 >
                   <option value="">Select a category</option>
-                  <option value="1">Electronics</option>
-                  <option value="2">Furniture</option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
                 </select>
               </label>
               <label style={styles.label}>
