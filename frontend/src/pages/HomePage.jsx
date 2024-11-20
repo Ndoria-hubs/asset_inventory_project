@@ -114,6 +114,7 @@ function HomePage() {
           <Link to="/about" style={styles.navLink}>About Us</Link>
 <<<<<<< HEAD
           <Link to="/contacts" style={styles.navLink}>Contact Us</Link>
+          <Link to="/features" style={styles.navLink}>Features</Link>
 =======
 >>>>>>> origin/victor
         </nav>
