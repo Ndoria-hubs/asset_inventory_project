@@ -11,6 +11,7 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const [assets, setAssets] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [users, setUsers] = useState([]);
   const [selectedSection, setSelectedSection] = useState('viewAssets');
   const [newAsset, setNewAsset] = useState({
     asset_name: '',
@@ -21,6 +22,8 @@ function AdminDashboard() {
     department_id: '',
   });
   const [editingAsset, setEditingAsset] = useState(null);
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: '' });
+  const [editingUser, setEditingUser] = useState(null);
 
   useEffect(() => {
     if (selectedSection === 'viewAssets' || selectedSection === 'manageAssets') {
@@ -29,6 +32,9 @@ function AdminDashboard() {
     if (selectedSection === 'viewRequests') {
       fetchRequests();
     }
+    if (selectedSection === 'manageUsers') {
+      fetchUsers();
+    }
   }, [selectedSection]);
 
   const fetchAssets = async () => {
@@ -36,7 +42,7 @@ function AdminDashboard() {
       const response = await axios.get('http://localhost:3000/Assets');
       setAssets(response.data);
     } catch (error) {
-      console.error("Error fetching assets:", error);
+      console.error('Error fetching assets:', error);
     }
   };
 
@@ -45,7 +51,16 @@ function AdminDashboard() {
       const response = await axios.get('http://localhost:3000/Requests');
       setRequests(response.data);
     } catch (error) {
-      console.error("Error fetching requests:", error);
+      console.error('Error fetching requests:', error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/Users');
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -64,7 +79,7 @@ function AdminDashboard() {
       fetchAssets();
       setNewAsset({ asset_name: '', description: '', category_id: '', condition: '', status: 'Available', department_id: '' });
     } catch (error) {
-      console.error("Error adding asset:", error);
+      console.error('Error adding asset:', error);
     }
   };
 
@@ -79,7 +94,7 @@ function AdminDashboard() {
       fetchAssets();
       setEditingAsset(null);
     } catch (error) {
-      console.error("Error updating asset:", error);
+      console.error('Error updating asset:', error);
     }
   };
 
@@ -88,26 +103,65 @@ function AdminDashboard() {
       await axios.delete(`http://localhost:3000/Assets/${id}`);
       fetchAssets();
     } catch (error) {
-      console.error("Error deleting asset:", error);
+      console.error('Error deleting asset:', error);
+    }
+  };
+
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:3000/Users', newUser);
+      fetchUsers();
+      setNewUser({ name: '', email: '', password: '', role: '' });
+    } catch (error) {
+      console.error('Error adding user:', error);
+    }
+  };
+
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(`http://localhost:3000/Users/${editingUser.id}`, editingUser);
+      fetchUsers();
+      setEditingUser(null);
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
+
+  const handleDeleteUser = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/Users/${id}`);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
     }
   };
 
   const handleApprove = async (id) => {
     try {
-      await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 2 }); // 2 for Approved
+      await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 2 });
       fetchRequests();
     } catch (error) {
-      console.error("Error approving request:", error);
+      console.error('Error approving request:', error);
     }
   };
 
   const handleReject = async (id) => {
     try {
-      await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 3 }); // 3 for Rejected
+      await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 3 });
       fetchRequests();
     } catch (error) {
-      console.error("Error rejecting request:", error);
+      console.error('Error rejecting request:', error);
     }
+  };
+
+  const closeModal = () => {
+    setEditingAsset(null);
   };
 
   return (
@@ -122,6 +176,7 @@ function AdminDashboard() {
           <li style={styles.navItem} onClick={() => handleSectionChange('viewAssets')}>View All Assets</li>
           <li style={styles.navItem} onClick={() => handleSectionChange('viewRequests')}>View Requests</li>
           <li style={styles.navItem} onClick={() => handleSectionChange('manageAssets')}>Manage Assets</li>
+          <li style={styles.navItem} onClick={() => handleSectionChange('manageUsers')}>Manage Users</li>
         </ul>
         <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
       </div>
@@ -129,17 +184,22 @@ function AdminDashboard() {
       <div style={styles.content}>
         <h1 style={styles.contentTitle}>Admin Dashboard</h1>
 
+        {/* View Assets Section */}
         {selectedSection === 'viewAssets' && (
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>All Assets</h2>
             <div style={styles.assetGrid}>
               {assets.length > 0 ? (
-                assets.map(asset => (
+                assets.map((asset) => (
                   <div key={asset.id} style={styles.assetCard}>
                     <img src={asset.image_url} alt={asset.asset_name} style={styles.assetImage} />
                     <h4>{asset.asset_name}</h4>
                     <p>{asset.description}</p>
                     <span>Status: {asset.status}</span>
+                    <div style={styles.buttonContainer}>
+                      <button onClick={() => handleEditAsset(asset)} style={styles.editButton}>Edit</button>
+                      <button onClick={() => handleDeleteAsset(asset.id)} style={styles.deleteButton}>Delete</button>
+                    </div>
                   </div>
                 ))
               ) : (
@@ -149,6 +209,67 @@ function AdminDashboard() {
           </div>
         )}
 
+        {/* Edit Asset Modal */}
+        {editingAsset && (
+          <div style={styles.modal}>
+            <div style={styles.modalHeader}>
+              <h2 style={styles.modalTitle}>Edit Asset</h2>
+              <button onClick={closeModal} style={styles.closeButton}>X</button>
+            </div>
+            <form onSubmit={handleUpdateAsset} style={styles.form}>
+              <input
+                type="text"
+                placeholder="Asset Name"
+                value={editingAsset.asset_name}
+                onChange={(e) =>
+                  setEditingAsset({ ...editingAsset, asset_name: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Description"
+                value={editingAsset.description}
+                onChange={(e) =>
+                  setEditingAsset({ ...editingAsset, description: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Category ID"
+                value={editingAsset.category_id}
+                onChange={(e) =>
+                  setEditingAsset({ ...editingAsset, category_id: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Condition"
+                value={editingAsset.condition}
+                onChange={(e) =>
+                  setEditingAsset({ ...editingAsset, condition: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Department ID"
+                value={editingAsset.department_id}
+                onChange={(e) =>
+                  setEditingAsset({ ...editingAsset, department_id: e.target.value })
+                }
+                style={styles.input}
+              />
+              <button type="submit" style={styles.submitButton}>
+                Update Asset
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* View Requests Section */}
         {selectedSection === 'viewRequests' && (
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>User Requests</h2>
@@ -170,7 +291,9 @@ function AdminDashboard() {
                     <td style={styles.tableCell}>{request.quantity}</td>
                     <td style={styles.tableCell}>{request.urgency}</td>
                     <td style={styles.tableCell}>{request.reason}</td>
-                    <td style={styles.tableCell}>{request.status_id === 1 ? "Pending" : request.status_id === 2 ? "Approved" : "Rejected"}</td>
+                    <td style={styles.tableCell}>
+                      {request.status_id === 1 ? 'Pending' : request.status_id === 2 ? 'Approved' : 'Rejected'}
+                    </td>
                     <td style={styles.tableCell}>
                       {request.status_id === 1 && (
                         <>
@@ -186,9 +309,10 @@ function AdminDashboard() {
           </div>
         )}
 
+        {/* Manage Assets Section */}
         {selectedSection === 'manageAssets' && (
           <div style={styles.section}>
-            <h2 style={styles.sectionTitle}>{editingAsset ? "Edit Asset" : "Add New Asset"}</h2>
+            <h2 style={styles.sectionTitle}>{editingAsset ? 'Edit Asset' : 'Add New Asset'}</h2>
             <form onSubmit={editingAsset ? handleUpdateAsset : handleAddAsset} style={styles.form}>
               <input
                 type="text"
@@ -246,9 +370,115 @@ function AdminDashboard() {
                 style={styles.input}
               />
               <button type="submit" style={styles.submitButton}>
-                {editingAsset ? "Update Asset" : "Add Asset"}
+                {editingAsset ? 'Update Asset' : 'Add Asset'}
               </button>
             </form>
+
+            <h2 style={styles.sectionTitle}>All Assets</h2>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.tableHeader}>Name</th>
+                  <th style={styles.tableHeader}>Description</th>
+                  <th style={styles.tableHeader}>Condition</th>
+                  <th style={styles.tableHeader}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assets.map((asset) => (
+                  <tr key={asset.id}>
+                    <td style={styles.tableCell}>{asset.asset_name}</td>
+                    <td style={styles.tableCell}>{asset.description}</td>
+                    <td style={styles.tableCell}>{asset.condition}</td>
+                    <td style={styles.tableCell}>
+                      <button onClick={() => handleEditAsset(asset)} style={styles.approveButton}>Edit</button>
+                      <button onClick={() => handleDeleteAsset(asset.id)} style={styles.rejectButton}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Manage Users Section */}
+        {selectedSection === 'manageUsers' && (
+          <div style={styles.section}>
+            <h2 style={styles.sectionTitle}>{editingUser ? 'Edit User' : 'Add New User'}</h2>
+            <form onSubmit={editingUser ? handleUpdateUser : handleAddUser} style={styles.form}>
+              <input
+                type="text"
+                placeholder="Name"
+                value={editingUser ? editingUser.name : newUser.name}
+                onChange={(e) =>
+                  editingUser
+                    ? setEditingUser({ ...editingUser, name: e.target.value })
+                    : setNewUser({ ...newUser, name: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={editingUser ? editingUser.email : newUser.email}
+                onChange={(e) =>
+                  editingUser
+                    ? setEditingUser({ ...editingUser, email: e.target.value })
+                    : setNewUser({ ...newUser, email: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={editingUser ? editingUser.password : newUser.password}
+                onChange={(e) =>
+                  editingUser
+                    ? setEditingUser({ ...editingUser, password: e.target.value })
+                    : setNewUser({ ...newUser, password: e.target.value })
+                }
+                style={styles.input}
+              />
+              <input
+                type="text"
+                placeholder="Role"
+                value={editingUser ? editingUser.role : newUser.role}
+                onChange={(e) =>
+                  editingUser
+                    ? setEditingUser({ ...editingUser, role: e.target.value })
+                    : setNewUser({ ...newUser, role: e.target.value })
+                }
+                style={styles.input}
+              />
+              <button type="submit" style={styles.submitButton}>
+                {editingUser ? 'Update User' : 'Add User'}
+              </button>
+            </form>
+
+            <h2 style={styles.sectionTitle}>All Users</h2>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.tableHeader}>Name</th>
+                  <th style={styles.tableHeader}>Email</th>
+                  <th style={styles.tableHeader}>Role</th>
+                  <th style={styles.tableHeader}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.id}>
+                    <td style={styles.tableCell}>{user.name}</td>
+                    <td style={styles.tableCell}>{user.email}</td>
+                    <td style={styles.tableCell}>{user.role}</td>
+                    <td style={styles.tableCell}>
+                      <button onClick={() => handleEditUser(user)} style={styles.approveButton}>Edit</button>
+                      <button onClick={() => handleDeleteUser(user.id)} style={styles.rejectButton}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -335,6 +565,56 @@ const styles = {
     objectFit: 'cover',
     borderRadius: '5px',
     marginBottom: '10px',
+  },
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginTop: '10px',
+  },
+  editButton: {
+    padding: '5px 10px',
+    backgroundColor: '#3498db',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+  },
+  deleteButton: {
+    padding: '5px 10px',
+    backgroundColor: '#e74c3c',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+  },
+  modal: {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: '#fff',
+    padding: '20px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    zIndex: 1000,
+    width: '400px',
+  },
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '20px',
+  },
+  modalTitle: {
+    fontSize: '20px',
+    margin: 0,
+  },
+  closeButton: {
+    backgroundColor: 'transparent',
+    border: 'none',
+    fontSize: '20px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
   },
   table: {
     width: '100%',
