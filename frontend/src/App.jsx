@@ -11,6 +11,7 @@ import AboutPage from './pages/AboutPage'; // Import AboutPage
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import UserDashboard from './pages/UserDashboard';
+import Features from './pages/FeaturesPage';
 
 
 function App() {
@@ -24,8 +25,8 @@ function App() {
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/manager-dashboard" element={<ManagerDashboard />} />
         <Route path="/about" element={<AboutPage />} /> {/* About Us Route */}
+        <Route path="/features" element={<Features />} /> {/* About Us Route */}
         {/* <Route path="/contacts" element={<ContactsPage />} /> Add Contacts Route */}
-        
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>
