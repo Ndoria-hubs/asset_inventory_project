@@ -4,3 +4,4 @@ forms.py
 instance
 seed.py
 .env
+*__pycache__
