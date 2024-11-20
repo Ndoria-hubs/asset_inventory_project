@@ -11,14 +11,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'jfdcbgfcxdgfddfgbgffhdhsjdf'
-CORS(app)
-CORS(app, resources={
-    r"/*": { 
-        "origins": "http://localhost:3000",
-        "methods": ["GET", "POST"],
-        "supports_credentials": True 
-    }
-})
+CORS(app, supports_credentials=True, origins="http://localhost:5173")
 DATABASE_URL = os.getenv("supabase_url")
 
 if DATABASE_URL:

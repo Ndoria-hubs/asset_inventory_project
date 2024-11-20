@@ -76,6 +76,7 @@ class RequestStatus(db.Model):
 class Request(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     request_type = db.Column(db.String(100))
+    asset_type = db.Column(db.String(30), nullable=True)
     asset_id = db.Column(db.Integer, db.ForeignKey('asset.id'), nullable=True)
     requested_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=False)

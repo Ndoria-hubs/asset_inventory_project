@@ -133,10 +133,17 @@ def add_asset():
     if current_user.role != 'Admin':
         return jsonify({'message': 'Unauthorized to access this page'}), 403
     data = request.get_json()
-    new_asset = Asset(asset_name=data.get("asset_name"), description=data.get("description"),
-                    category_id=data.get('category_id'),image_url= data.get("image_url"), status=data.get("status"),
-                    department_id=data.get("department_id"),allocated_to=data.get("allocated_to"),
-                    created_at=datetime.utcnow(), updated_at=datetime.utcnow())
+    new_asset = Asset(
+                    asset_name=data.get("asset_name"),
+                    description=data.get("description"),
+                    category_id=data.get('category_id'),
+                    image_url= data.get("image_url"), 
+                    status=data.get("status"),
+                    department_id=data.get("department_id"),
+                    allocated_to=data.get("allocated_to"),
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow()
+                    )
     db.session.add(new_asset)
     db.session.commit()
     return jsonify({'message': 'Asset added successfully'})
@@ -179,8 +186,8 @@ def requests():
     for req in requests:
         req = {
             'request_type': req.request_type,
-            'asset_name': req.related_asset.asset_name,
-            'asset_image': req.related_asset.image_url,
+            'asset_name': req.related_asset.asset_name if req.related_asset else 'Not specified',
+            'asset_image': req.related_asset.image_url if req.related_asset else 'Not specified',
             'requested_by': req.user_requesting.username,
             'department': req.department_requesting.department_name,
             'quantity': req.quantity,
@@ -201,7 +208,7 @@ def get_request(id):
     get_request = Request.query.get_or_404(id)
     request_data = {
         'request_type': get_request.request_type,
-        'asset_name': get_request.related_asset.asset_name,
+        'asset_name': get_request.related_asset.asset_name if get_request.related_asset else 'Not specified',
         'asset_image': get_request.related_asset.image_url,
         'requested_by': get_request.user_requesting.username,
         'department': get_request.department_requesting.department_name,
@@ -217,27 +224,26 @@ def get_request(id):
 @app.route('/new_request', methods=['POST'])
 @login_required 
 def add_request():
-    if request.method == 'POST':
         data = request.get_json()
 
         request_type = data.get("request_type")
+        asset_type = data.get("asset_type")
         asset_id = data.get("asset_id")
-        department_id = data.get("department_id")
+        if asset_id == "":
+            asset_id = None
         quantity = data.get("quantity")
         urgency = data.get("urgency")
         reason = data.get("reason")
 
-        if current_user.department_id != department_id:
-            return jsonify({'message': 'you can only make request for your department'}), 403
-
         new_request = Request(
             request_type=request_type,
+            asset_type=asset_type,
             asset_id=asset_id,
-            requested_by=current_user.id,
-            department_id=department_id,
             quantity=quantity,
             urgency=urgency,
             reason=reason,
+            requested_by=current_user.id,
+            department_id=current_user.department_id,
             status_id=1,  
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow()
@@ -315,8 +321,29 @@ def pending_requests():
     for req in requests:
         req = {
             'request_type': req.request_type,
-            'asset_name': req.related_asset.asset_name,
+            'asset_name': req.related_asset.asset_name if req.related_asset else 'Not specified',
             'asset_image': req.related_asset.image_url,
+            'requested_by': req.user_requesting.username,
+            'department': req.department_requesting.department_name,
+            'quantity': req.quantity,
+            'urgency': req.urgency,
+            'reason': req.reason,
+            'status': req.request_status.status_name,
+            'created_at': req.created_at.strftime('%d/%m/%Y %H:%M')
+        }
+        request_data.append(req)
+    return jsonify({'requests': request_data})
+
+@app.route('/my_requests', methods=['GET'])
+@login_required
+def my_requests():
+    requests = Request.query.filter_by(requested_by=current_user.id).all()
+    request_data = []
+    for req in requests:
+        req = {
+            'request_type': req.request_type,
+            'asset_name': req.related_asset.asset_name if req.related_asset else 'Not specified',
+            'asset_image': req.related_asset.image_url if req.related_asset else 'Not specified',
             'requested_by': req.user_requesting.username,
             'department': req.department_requesting.department_name,
             'quantity': req.quantity,
