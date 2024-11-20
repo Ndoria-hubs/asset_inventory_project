@@ -481,7 +481,6 @@ const styles = {
     height: '120px',
     objectFit: 'cover',
     borderRadius: '5px',
->>>>>>> origin/victor
     marginBottom: '10px',
   },
   table: {
@@ -523,7 +522,6 @@ const styles = {
   approveButton: {
     padding: '5px 10px',
     marginRight: '5px',
->>>>>>> origin/victor
     backgroundColor: '#28a745',
     color: 'white',
     border: 'none',
