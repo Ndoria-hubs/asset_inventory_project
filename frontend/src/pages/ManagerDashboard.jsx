@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { CSVLink } from "react-csv";
-<<<<<<< HEAD
 import { useSelector } from 'react-redux';
 import { AiOutlineUser } from 'react-icons/ai';
 
@@ -10,10 +9,6 @@ function ProcManagerDashboard() {
   const user = useSelector((state) => state.auth.user)
   console.log("User:", user);
 
-=======
-
-function ProcManagerDashboard() {
->>>>>>> origin/victor
   const navigate = useNavigate();
   const [assets, setAssets] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -28,13 +23,10 @@ function ProcManagerDashboard() {
   });
   const [editingAsset, setEditingAsset] = useState(null);
 
-<<<<<<< HEAD
   const [sortCriteria, setSortCriteria] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-=======
->>>>>>> origin/victor
   useEffect(() => {
     if (selectedSection === 'viewAssets' || selectedSection === 'manageAssets') {
       fetchAssets();
@@ -42,7 +34,6 @@ function ProcManagerDashboard() {
     if (selectedSection === 'viewRequests') {
       fetchRequests();
     }
-<<<<<<< HEAD
   }, [selectedSection, sortCriteria, categoryFilter, statusFilter]);
 
   const fetchAssets = async () => {
@@ -75,14 +66,6 @@ function ProcManagerDashboard() {
       }
 
       setAssets(filteredAssets);
-=======
-  }, [selectedSection]);
-
-  const fetchAssets = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/Assets');
-      setAssets(response.data);
->>>>>>> origin/victor
     } catch (error) {
       console.error("Error fetching assets:", error);
     }
@@ -117,13 +100,10 @@ function ProcManagerDashboard() {
   return (
     <div style={styles.adminDashboard}>
       <div style={styles.sidebar}>
-<<<<<<< HEAD
       <div style={styles.userInfo}>
         <AiOutlineUser style={styles.userIcon} />
         <strong>{user.username}</strong>
       </div> 
-=======
->>>>>>> origin/victor
         <h2 style={styles.sidebarTitle}>Procurement Manager Dashboard</h2>
         <ul style={styles.navList}>
           <li style={styles.navItem} onClick={() => handleSectionChange('viewAssets')}>View All Assets</li>
@@ -142,7 +122,6 @@ function ProcManagerDashboard() {
         {selectedSection === 'viewAssets' && (
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>All Assets</h2>
-<<<<<<< HEAD
 
             <div style={styles.filterContainer}>
               <select
@@ -177,8 +156,6 @@ function ProcManagerDashboard() {
               </select>
             </div>
 
-=======
->>>>>>> origin/victor
             <div style={styles.assetGrid}>
               {assets.length > 0 ? (
                 assets.map(asset => (
@@ -281,7 +258,6 @@ function ProcManagerDashboard() {
                 }
                 style={styles.input}
               />
-<<<<<<< HEAD
               <select
                 value={editingAsset ? editingAsset.status : newAsset.status}
                 onChange={(e) =>
@@ -296,8 +272,7 @@ function ProcManagerDashboard() {
               </select>
 
               <button type="submit" style={styles.submitButton}>
-                {editingAsset ? 'Update Asset' : 'Add Asset'}
-=======
+                {editingAsset ? 'Update Asset' : 'Add Asset'}</button>
               <input
                 type="text"
                 placeholder="Department ID"
@@ -311,7 +286,6 @@ function ProcManagerDashboard() {
               />
               <button type="submit" style={styles.submitButton}>
                 {editingAsset ? "Update Asset" : "Add Asset"}
->>>>>>> origin/victor
               </button>
             </form>
           </div>
@@ -325,39 +299,24 @@ const styles = {
   adminDashboard: {
     display: 'flex',
     minHeight: '100vh',
-<<<<<<< HEAD
-  },
-  sidebar: {
-    width: '250px',
-    backgroundColor: '#333',
-=======
     fontFamily: 'Arial, sans-serif',
     backgroundColor: '#f4f6f8',
   },
   sidebar: {
     width: '250px',
     backgroundColor: '#2c3e50',
->>>>>>> origin/victor
     color: 'white',
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
   },
   sidebarTitle: {
-<<<<<<< HEAD
     fontSize: '24px',
     marginBottom: '20px',
-=======
-    fontSize: '22px',
-    fontWeight: 'bold',
-    marginBottom: '20px',
-    color: '#ecf0f1',
->>>>>>> origin/victor
   },
   navList: {
     listStyleType: 'none',
     padding: 0,
-<<<<<<< HEAD
   },
   navItem: {
     marginBottom: '10px',
@@ -422,7 +381,6 @@ const styles = {
   assetImage: {
     width: '100%',
     height: 'auto',
-=======
     marginBottom: '20px',
   },
   navItem: {
@@ -486,7 +444,6 @@ const styles = {
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-<<<<<<< HEAD
   },
   tableHeader: {
     backgroundColor: '#f4f4f4',
@@ -499,10 +456,7 @@ const styles = {
   },
   approveButton: {
     padding: '5px 10px',
-=======
     marginTop: '10px',
-    borderRadius: '8px',
-    overflow: 'hidden',
   },
   tableHeader: {
     backgroundColor: '#34495e',
@@ -524,7 +478,6 @@ const styles = {
     marginRight: '5px',
     backgroundColor: '#28a745',
     color: 'white',
-    border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
   },
@@ -536,7 +489,6 @@ const styles = {
     borderRadius: '4px',
     cursor: 'pointer',
   },
-<<<<<<< HEAD
   form: {
     display: 'flex',
     flexDirection: 'column',
@@ -551,24 +503,11 @@ const styles = {
   submitButton: {
     padding: '10px',
     backgroundColor: '#007bff',
-=======
-  submitButton: {
-    padding: '10px',
-    backgroundColor: '#3498db',
->>>>>>> origin/victor
     color: 'white',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
   },
-  input: {
-    marginBottom: '10px',
-    padding: '8px',
-    width: '100%',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-  },
-<<<<<<< HEAD
   userInfo: {
     position: 'absolute',
     top: '30px', // 20px from top of the page
@@ -586,8 +525,6 @@ const styles = {
   userIcon: {
     fontSize: '30px', // Increase icon size
   }
-=======
->>>>>>> origin/victor
 };
 
 export default ProcManagerDashboard;

@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-// src/services/api.js
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:3000',
-});
-
-=======
 import axios from "axios";
 
 const API_URL = "http://localhost:5000";
@@ -65,5 +56,4 @@ export const submitReview = (review) => {
   return handleApiCall("post", `/request/${review.id}/review`, review);
 };
 
->>>>>>> origin/victor
 export default api;
