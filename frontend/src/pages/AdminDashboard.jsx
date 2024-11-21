@@ -144,21 +144,28 @@ function AdminDashboard() {
 
   const handleApprove = async (id) => {
     try {
+      // Send a PATCH request to update the status to "Approved" (2)
       await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 2 });
-      fetchRequests();
+      alert('Request approved');
+      fetchRequests(); // Re-fetch the requests to get updated data
     } catch (error) {
       console.error('Error approving request:', error);
     }
   };
-
+  
   const handleReject = async (id) => {
     try {
+      // Send a PATCH request to update the status to "Rejected" (3)
       await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 3 });
-      fetchRequests();
+      alert('Request rejected');
+      fetchRequests(); // Re-fetch the requests to get updated data
     } catch (error) {
       console.error('Error rejecting request:', error);
     }
   };
+  
+  
+  
 
   const closeModal = () => {
     setEditingAsset(null);
@@ -285,25 +292,29 @@ function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {requests.map((request) => (
-                  <tr key={request.id}>
-                    <td style={styles.tableCell}>{request.request_type}</td>
-                    <td style={styles.tableCell}>{request.quantity}</td>
-                    <td style={styles.tableCell}>{request.urgency}</td>
-                    <td style={styles.tableCell}>{request.reason}</td>
-                    <td style={styles.tableCell}>
-                      {request.status_id === 1 ? 'Pending' : request.status_id === 2 ? 'Approved' : 'Rejected'}
-                    </td>
-                    <td style={styles.tableCell}>
-                      {request.status_id === 1 && (
-                        <>
-                          <button onClick={() => handleApprove(request.id)} style={styles.approveButton}>Approve</button>
-                          <button onClick={() => handleReject(request.id)} style={styles.rejectButton}>Reject</button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+              {requests.map((request) => (
+  <tr key={request.id}>
+    <td style={styles.tableCell}>{request.request_type}</td>
+    <td style={styles.tableCell}>{request.quantity}</td>
+    <td style={styles.tableCell}>{request.urgency}</td>
+    <td style={styles.tableCell}>{request.reason}</td>
+    <td style={styles.tableCell}>
+      {request.status_id === 1 ? 'Pending' : request.status_id === 2 ? 'Approved' : 'Rejected'}
+    </td>
+    <td style={styles.tableCell}>
+      {request.status_id === 1 && (
+        <>
+          <button onClick={() => handleApprove(request.id)} style={styles.approveButton}>
+            Approve
+          </button>
+          <button onClick={() => handleReject(request.id)} style={styles.rejectButton}>
+            Reject
+          </button>
+        </>
+      )}
+    </td>
+  </tr>
+))}
               </tbody>
             </table>
           </div>
