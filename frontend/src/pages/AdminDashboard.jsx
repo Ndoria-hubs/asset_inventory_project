@@ -39,7 +39,7 @@ function AdminDashboard() {
 
   const fetchAssets = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/Assets');
+      const response = await axios.get('https://ht-json-server-vercel.vercel.app/Assets');
       setAssets(response.data);
     } catch (error) {
       console.error('Error fetching assets:', error);
@@ -48,7 +48,7 @@ function AdminDashboard() {
 
   const fetchRequests = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/Requests');
+      const response = await axios.get('https://ht-json-server-vercel.vercel.app/Requests');
       setRequests(response.data);
     } catch (error) {
       console.error('Error fetching requests:', error);
@@ -57,7 +57,7 @@ function AdminDashboard() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/Users');
+      const response = await axios.get('https://ht-json-server-vercel.vercel.app/Users');
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -75,7 +75,7 @@ function AdminDashboard() {
   const handleAddAsset = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3000/Assets', newAsset);
+      await axios.post('https://ht-json-server-vercel.vercel.app/Assets', newAsset);
       fetchAssets();
       setNewAsset({ asset_name: '', description: '', category_id: '', condition: '', status: 'Available', department_id: '' });
     } catch (error) {
@@ -90,7 +90,7 @@ function AdminDashboard() {
   const handleUpdateAsset = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:3000/Assets/${editingAsset.id}`, editingAsset);
+      await axios.put(`https://ht-json-server-vercel.vercel.app/Assets/${editingAsset.id}`, editingAsset);
       fetchAssets();
       setEditingAsset(null);
     } catch (error) {
@@ -100,7 +100,7 @@ function AdminDashboard() {
 
   const handleDeleteAsset = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/Assets/${id}`);
+      await axios.delete(`https://ht-json-server-vercel.vercel.app/Assets/${id}`);
       fetchAssets();
     } catch (error) {
       console.error('Error deleting asset:', error);
@@ -110,7 +110,7 @@ function AdminDashboard() {
   const handleAddUser = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3000/Users', newUser);
+      await axios.post('https://ht-json-server-vercel.vercel.app/Users', newUser);
       fetchUsers();
       setNewUser({ name: '', email: '', password: '', role: '' });
     } catch (error) {
@@ -125,7 +125,7 @@ function AdminDashboard() {
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:3000/Users/${editingUser.id}`, editingUser);
+      await axios.put(`https://ht-json-server-vercel.vercel.app/Users/${editingUser.id}`, editingUser);
       fetchUsers();
       setEditingUser(null);
     } catch (error) {
@@ -135,7 +135,7 @@ function AdminDashboard() {
 
   const handleDeleteUser = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/Users/${id}`);
+      await axios.delete(`https://ht-json-server-vercel.vercel.app/Users/${id}`);
       fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -145,7 +145,7 @@ function AdminDashboard() {
   const handleApprove = async (id) => {
     try {
       // Send a PATCH request to update the status to "Approved" (2)
-      await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 2 });
+      await axios.patch(`https://ht-json-server-vercel.vercel.app/Requests/${id}`, { status_id: 2 });
       alert('Request approved');
       fetchRequests(); // Re-fetch the requests to get updated data
     } catch (error) {
@@ -156,7 +156,7 @@ function AdminDashboard() {
   const handleReject = async (id) => {
     try {
       // Send a PATCH request to update the status to "Rejected" (3)
-      await axios.patch(`http://localhost:3000/Requests/${id}`, { status_id: 3 });
+      await axios.patch(`https://ht-json-server-vercel.vercel.app/Requests/${id}`, { status_id: 3 });
       alert('Request rejected');
       fetchRequests(); // Re-fetch the requests to get updated data
     } catch (error) {

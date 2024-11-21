@@ -33,8 +33,8 @@ function UserDashboard() {
     const fetchData = async () => {
       try {
         const [assetsResponse, requestsResponse] = await Promise.all([
-          axios.get('http://localhost:3000/Assets'),
-          axios.get('http://localhost:3000/Requests'),
+          axios.get('https://ht-json-server-vercel.vercel.app/Assets'),
+          axios.get('https://ht-json-server-vercel.vercel.app/Requests'),
         ]);
 
         setAssets(assetsResponse.data);
@@ -60,7 +60,7 @@ function UserDashboard() {
     };
 
     try {
-      await axios.post('http://localhost:3000/Requests', newRequest);
+      await axios.post('https://ht-json-server-vercel.vercel.app/Requests', newRequest);
       setRequests([...requests, newRequest]);
       handleCancel();
       setActiveSection('viewRequests');

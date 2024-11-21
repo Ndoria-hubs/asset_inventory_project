@@ -34,7 +34,7 @@ function ProcManagerDashboard() {
 
   const fetchAssets = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/Assets');
+      const response = await axios.get('https://ht-json-server-vercel.vercel.app/Assets');
       setAssets(response.data);
     } catch (error) {
       console.error("Error fetching assets:", error);
@@ -43,7 +43,7 @@ function ProcManagerDashboard() {
 
   const fetchRequests = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/Requests');
+      const response = await axios.get('https://ht-json-server-vercel.vercel.app/Requests');
       setRequests(response.data);
     } catch (error) {
       console.error("Error fetching requests:", error);
